@@ -9,28 +9,25 @@ namespace TournamentServices.Api.Tests;
 
 public abstract class TournamentApiTests : IDisposable
 {
-    protected TournamentWebApplicationFactory Factory { get; }
-    protected HttpClient Client { get; }
+    protected readonly HttpClient Client;
+    private readonly TournamentWebApplicationFactory _factory = new();
 
     protected TournamentApiTests()
     {
-        Factory = new TournamentWebApplicationFactory();
-        Client = Factory.CreateClient();
+        Client = _factory.CreateClient();
     }
 
     public void Dispose()
     {
         Client.Dispose();
-        Factory.Dispose();
-        GC.SuppressFinalize(this);
+        _factory.Dispose();
     }
 }
 
-public sealed class TournamentWebApplicationFactory : WebApplicationFactory<Program>
+public class TournamentWebApplicationFactory : WebApplicationFactory<Program>
 {
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder.UseEnvironment("Development");
         builder.ConfigureTestServices(services =>
         {
             services.RemoveAll<ITeamRepository>();

@@ -7,8 +7,6 @@ public class UpdateTeamDtoValidator : AbstractValidator<UpdateTeamDto>
 {
     public UpdateTeamDtoValidator()
     {
-        RuleFor(dto => dto.Name)
-            .NotEmpty()
-            .WithMessage("Name is required.");
+        RuleFor(x => x.Name).NotEmpty();
     }
 }

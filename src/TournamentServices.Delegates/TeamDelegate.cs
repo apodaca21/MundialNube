@@ -6,22 +6,22 @@ namespace TournamentServices.Delegates;
 
 public class TeamDelegate : ITeamDelegate
 {
-    private readonly ITeamRepository _teamRepository;
+    private readonly ITeamRepository _repo;
 
-    public TeamDelegate(ITeamRepository teamRepository)
+    public TeamDelegate(ITeamRepository repo)
     {
-        _teamRepository = teamRepository;
+        _repo = repo;
     }
 
     public Task<IReadOnlyList<Team>> GetAllAsync(CancellationToken cancellationToken = default)
-        => _teamRepository.GetAllAsync(cancellationToken);
+        => _repo.GetAllAsync(cancellationToken);
 
     public Task<Team?> GetByIdAsync(string id, CancellationToken cancellationToken = default)
-        => _teamRepository.GetByIdAsync(id, cancellationToken);
+        => _repo.GetByIdAsync(id, cancellationToken);
 
     public async Task<string> CreateAsync(string name, CancellationToken cancellationToken = default)
     {
-        await EnsureNameIsUniqueAsync(name, excludedTeamId: null, cancellationToken);
+        await EnsureUniqueName(name, null, cancellationToken);
 
         var team = new Team
         {
@@ -29,40 +29,36 @@ public class TeamDelegate : ITeamDelegate
             Name = name
         };
 
-        await _teamRepository.AddAsync(team, cancellationToken);
+        await _repo.AddAsync(team, cancellationToken);
         return team.Id;
     }
 
     public async Task<Team> UpdateAsync(string id, string name, CancellationToken cancellationToken = default)
     {
-        var team = await _teamRepository.GetByIdAsync(id, cancellationToken)
-            ?? throw new TeamNotFoundException(id);
+        var team = await _repo.GetByIdAsync(id, cancellationToken);
+        if (team == null)
+            throw new TeamNotFoundException(id);
 
-        await EnsureNameIsUniqueAsync(name, excludedTeamId: id, cancellationToken);
+        await EnsureUniqueName(name, id, cancellationToken);
 
         team.Name = name;
-        await _teamRepository.UpdateAsync(team, cancellationToken);
+        await _repo.UpdateAsync(team, cancellationToken);
         return team;
     }
 
     public async Task DeleteAsync(string id, CancellationToken cancellationToken = default)
     {
-        _ = await _teamRepository.GetByIdAsync(id, cancellationToken)
-            ?? throw new TeamNotFoundException(id);
+        var team = await _repo.GetByIdAsync(id, cancellationToken);
+        if (team == null)
+            throw new TeamNotFoundException(id);
 
-        // Referential integrity (groups/matches) will be enforced when those aggregates exist.
-        await _teamRepository.DeleteAsync(id, cancellationToken);
+        await _repo.DeleteAsync(id, cancellationToken);
     }
 
-    private async Task EnsureNameIsUniqueAsync(
-        string name,
-        string? excludedTeamId,
-        CancellationToken cancellationToken)
+    private async Task EnsureUniqueName(string name, string? currentId, CancellationToken cancellationToken)
     {
-        var existing = await _teamRepository.GetByNameAsync(name, cancellationToken);
-        if (existing is not null && existing.Id != excludedTeamId)
-        {
+        var existing = await _repo.GetByNameAsync(name, cancellationToken);
+        if (existing != null && existing.Id != currentId)
             throw new DuplicateTeamNameException(name);
-        }
     }
 }

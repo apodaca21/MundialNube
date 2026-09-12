@@ -12,7 +12,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
     options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-    options.SerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
     options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
 
