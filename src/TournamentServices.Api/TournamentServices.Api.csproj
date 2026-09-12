@@ -2,10 +2,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TournamentServices.Delegates\TournamentServices.Delegates.csproj" />
+    <ProjectReference Include="..\TournamentServices.Repositories\TournamentServices.Repositories.csproj" />
+    <ProjectReference Include="..\TournamentServices.Domain\TournamentServices.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="FluentValidation" Version="12.1.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.3" />
   </ItemGroup>
 
   <PropertyGroup>

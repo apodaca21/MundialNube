@@ -1,6 +1,25 @@
-@TournamentServices.Api_HostAddress = http://localhost:5068
+@TournamentServices.Api_HostAddress = http://localhost:8080
 
-GET {{TournamentServices.Api_HostAddress}}/weatherforecast/
+GET {{TournamentServices.Api_HostAddress}}/health
 Accept: application/json
+
+###
+
+GET {{TournamentServices.Api_HostAddress}}/teams
+Accept: application/json
+
+###
+
+GET {{TournamentServices.Api_HostAddress}}/teams/invalid id
+Accept: application/json
+
+###
+
+POST {{TournamentServices.Api_HostAddress}}/teams
+Content-Type: application/json
+
+{
+  "name": "Mexico"
+}
 
 ###
