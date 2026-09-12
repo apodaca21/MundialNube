@@ -37,3 +37,5 @@ app.MapGet("/health", () => TypedResults.Ok("Services running"));
 app.MapTeamRoutes();
 
 app.Run();
+
+public partial class Program;
