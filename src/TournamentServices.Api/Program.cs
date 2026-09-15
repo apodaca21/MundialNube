@@ -21,9 +21,18 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddSingleton<ITeamRepository, TeamRepository>();
+builder.Services.AddSingleton<IGroupRepository, GroupRepository>();
+builder.Services.AddSingleton<IMatchRepository, MatchRepository>();
 builder.Services.AddScoped<ITeamDelegate, TeamDelegate>();
+builder.Services.AddScoped<IGroupDelegate, GroupDelegate>();
+builder.Services.AddScoped<IMatchDelegate, MatchDelegate>();
 builder.Services.AddScoped<IValidator<CreateTeamDto>, CreateTeamDtoValidator>();
 builder.Services.AddScoped<IValidator<UpdateTeamDto>, UpdateTeamDtoValidator>();
+builder.Services.AddScoped<IValidator<CreateGroupDto>, CreateGroupDtoValidator>();
+builder.Services.AddScoped<IValidator<UpdateGroupDto>, UpdateGroupDtoValidator>();
+builder.Services.AddScoped<IValidator<AssignTeamsDto>, AssignTeamsDtoValidator>();
+builder.Services.AddScoped<IValidator<CreateMatchDto>, CreateMatchDtoValidator>();
+builder.Services.AddScoped<IValidator<UpdateScoreDto>, UpdateScoreDtoValidator>();
 
 builder.Services.AddDbContext<TournamentDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("TournamentsConnection")));
@@ -51,6 +60,8 @@ if (app.Environment.IsDevelopment())
 app.MapGet("/health", () => TypedResults.Ok("Services running"));
 app.MapTeamRoutes();
 app.MapTournamentRoutes();
+app.MapGroupRoutes();
+app.MapMatchRoutes();
 
 app.Run();
 
