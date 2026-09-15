@@ -1,0 +1,58 @@
+@host = http://localhost:8080
+# Sustituye este valor por el id devuelto al crear un torneo.
+@tournamentId = reemplazar-por-id
+
+### Crear
+POST {{host}}/tournaments
+Content-Type: application/json
+
+{
+  "name": "Mundial demo",
+  "format": {
+    "type": "ROUND_ROBIN",
+    "maxGroups": 12,
+    "maxTeamsPerGroup": 4
+  }
+}
+
+### Listar
+GET {{host}}/tournaments
+
+### Consultar por id
+GET {{host}}/tournaments/{{tournamentId}}
+
+### Cambiar solo un límite (los demás campos se conservan)
+PATCH {{host}}/tournaments/{{tournamentId}}
+Content-Type: application/json
+
+{
+  "format": {
+    "maxGroups": 8
+  }
+}
+
+### Reemplazar nombre y formato completo
+PUT {{host}}/tournaments/{{tournamentId}}
+Content-Type: application/json
+
+{
+  "name": "Copa demo",
+  "format": {
+    "type": "ROUND_ROBIN",
+    "maxGroups": 4,
+    "maxTeamsPerGroup": 4
+  }
+}
+
+### Validación: debe responder 400
+PATCH {{host}}/tournaments/{{tournamentId}}
+Content-Type: application/json
+
+{
+  "format": {
+    "maxTeamsPerGroup": 1
+  }
+}
+
+### Eliminar junto con sus grupos y partidos
+DELETE {{host}}/tournaments/{{tournamentId}}
