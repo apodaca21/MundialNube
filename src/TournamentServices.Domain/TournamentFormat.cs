@@ -1,4 +1,5 @@
 namespace TournamentServices.Domain;
+// Nota, Cambiar Nombre de Round Robin a Mundial
 
 public sealed record TournamentFormat
 {
