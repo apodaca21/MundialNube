@@ -31,7 +31,7 @@ public class MatchRoutesTests : TournamentApiTests
         var response = await Client.PostAsJsonAsync("/tournaments", new
         {
             name,
-            format = new { type = "ROUND_ROBIN", maxGroups = 4, maxTeamsPerGroup }
+            format = new { type = "ROUND_ROBIN", maxGroups = 8, maxTeamsPerGroup }
         });
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         return await Read<TournamentDto>(response);

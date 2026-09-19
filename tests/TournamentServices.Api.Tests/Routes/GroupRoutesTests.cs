@@ -17,7 +17,7 @@ public class GroupRoutesTests : TournamentApiTests
     [Fact]
     public async Task GroupWorkflow_CreatesAssignsScoresAndDeletesGroupMatches()
     {
-        var tournament = await CreateTournament("World Cup", maxTeamsPerGroup: 2);
+        var tournament = await CreateTournament("World Cup", maxTeamsPerGroup: 4);
         var home = await CreateTeam("Mexico");
         var visitor = await CreateTeam("Argentina");
 
@@ -55,25 +55,27 @@ public class GroupRoutesTests : TournamentApiTests
     [Fact]
     public async Task AssignTeams_Returns422_WhenTeamLimitIsExceeded()
     {
-        var tournament = await CreateTournament("World Cup", maxTeamsPerGroup: 2);
+        var tournament = await CreateTournament("World Cup", maxTeamsPerGroup: 4);
         var group = await CreateGroup(tournament.Id, "Group A");
         var first = await CreateTeam("Mexico");
         var second = await CreateTeam("Argentina");
         var third = await CreateTeam("Canada");
+        var forth=await CreateTeam("Colombia");
+        var fith=await CreateTeam("USA");
 
         var response = await Client.PatchAsJsonAsync(
             $"/tournaments/{tournament.Id}/groups/{group.Id}/teams",
-            new AssignTeamsDto([first.Id, second.Id, third.Id]));
+            new AssignTeamsDto([first.Id, second.Id, third.Id,forth.Id,fith.Id]));
 
         Assert.Equal(HttpStatusCode.UnprocessableEntity, response.StatusCode);
     }
 
-    private async Task<TournamentDto> CreateTournament(string name, int maxTeamsPerGroup = 4)
+    private async Task<TournamentDto> CreateTournament(string name, int maxTeamsPerGroup = 8)
     {
         var response = await Client.PostAsJsonAsync("/tournaments", new
         {
             name,
-            format = new { type = "ROUND_ROBIN", maxGroups = 4, maxTeamsPerGroup }
+            format = new { type = "ROUND_ROBIN", maxGroups = 8, maxTeamsPerGroup }
         });
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         return await Read<TournamentDto>(response);

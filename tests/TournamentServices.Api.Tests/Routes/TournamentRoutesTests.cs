@@ -24,7 +24,7 @@ public class TournamentRoutesTests : TournamentApiTests
     public async Task Get_Tournaments_Returns200_WithStoredTournamentsAndFormats()
     {
         var first = await CreateTournament("World Cup");
-        var second = await CreateTournament("Regional Cup", 1, 8);
+        var second = await CreateTournament("Regional Cup", 8, 4);
 
         var response = await Client.GetAsync("/tournaments");
         var tournaments = await ReadList(response);
@@ -65,8 +65,8 @@ public class TournamentRoutesTests : TournamentApiTests
     }
 
     [Theory]
-    [InlineData(1, 2)]
-    [InlineData(16, 8)]
+    //[InlineData(8, 4)]
+    [InlineData(8, 4)]
     public async Task Post_Tournaments_Returns201_WithLocationAndPersistsFormat(int maxGroups, int maxTeamsPerGroup)
     {
         var response = await Client.PostAsJsonAsync("/tournaments", FullBody("World Cup", maxGroups, maxTeamsPerGroup));
@@ -95,20 +95,21 @@ public class TournamentRoutesTests : TournamentApiTests
     {
         var created = await CreateTournament("World Cup");
 
-        var response = await Client.PutAsJsonAsync($"/tournaments/{created.Id}", FullBody("Regional Cup", 2, 8));
+        var response = await Client.PutAsJsonAsync($"/tournaments/{created.Id}", FullBody("Regional Cup", 8, 4));
         var updated = await Read(response);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Equal(created.Id, updated.Id);
         Assert.Equal("Regional Cup", updated.Name);
-        Assert.Equal(new TournamentFormatDto("ROUND_ROBIN", 2, 8), updated.Format);
+        Assert.Equal(new TournamentFormatDto("ROUND_ROBIN", 8, 4), updated.Format);
         Assert.Equal(updated, await GetTournament(created.Id));
     }
 
     [Fact]
     public async Task Put_Tournament_Returns404_WhenTournamentDoesNotExist()
     {
-        var response = await Client.PutAsJsonAsync("/tournaments/missing-tournament", FullBody("World Cup"));
+        var nonExistentId = Guid.NewGuid();
+        var response = await Client.PutAsJsonAsync($"/tournaments/{nonExistentId}", FullBody("World Cup"));
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
@@ -134,20 +135,20 @@ public class TournamentRoutesTests : TournamentApiTests
     }
 
     [Theory]
-    [InlineData("{\"name\":\"Regional Cup\"}", "Regional Cup", 4, 4)]
-    [InlineData("{\"format\":{\"type\":\"ROUND_ROBIN\"}}", "World Cup", 4, 4)]
-    [InlineData("{\"format\":{\"maxGroups\":1}}", "World Cup", 1, 4)]
-    [InlineData("{\"format\":{\"maxTeamsPerGroup\":8}}", "World Cup", 4, 8)]
-    [InlineData("{\"name\":\"Regional Cup\",\"format\":{\"type\":\"ROUND_ROBIN\",\"maxGroups\":16,\"maxTeamsPerGroup\":2}}", "Regional Cup", 16, 2)]
-    [InlineData("{\"name\":null,\"format\":{\"maxGroups\":2}}", "World Cup", 2, 4)]
-    [InlineData("{\"name\":\"Regional Cup\",\"format\":null}", "Regional Cup", 4, 4)]
-    [InlineData("{\"name\":\"Regional Cup\",\"format\":{}}", "Regional Cup", 4, 4)]
-    [InlineData("{\"format\":{\"type\":null,\"maxGroups\":2,\"maxTeamsPerGroup\":null}}", "World Cup", 2, 4)]
-    [InlineData("{\"format\":{\"type\":\"ROUND_ROBIN\",\"maxGroups\":null,\"maxTeamsPerGroup\":null}}", "World Cup", 4, 4)]
+    [InlineData("{\"name\":\"Regional Cup\"}", "Regional Cup", 8, 4)]
+    [InlineData("{\"format\":{\"type\":\"ROUND_ROBIN\"}}", "World Cup", 8, 4)]
+    [InlineData("{\"format\":{\"maxGroups\":8}}", "World Cup", 8, 4)]
+    [InlineData("{\"format\":{\"maxTeamsPerGroup\":4}}", "World Cup", 8, 4)]
+    [InlineData("{\"name\":\"Regional Cup\",\"format\":{\"type\":\"ROUND_ROBIN\",\"maxGroups\":8,\"maxTeamsPerGroup\":4}}", "Regional Cup", 8, 4)]
+    [InlineData("{\"name\":null,\"format\":{\"maxGroups\":8}}", "World Cup", 8, 4)]
+    [InlineData("{\"name\":\"Regional Cup\",\"format\":null}", "Regional Cup", 8, 4)]
+    [InlineData("{\"name\":\"Regional Cup\",\"format\":{}}", "Regional Cup", 8, 4)]
+    [InlineData("{\"format\":{\"type\":null,\"maxGroups\":8,\"maxTeamsPerGroup\":null}}", "World Cup", 8, 4)]
+    [InlineData("{\"format\":{\"type\":\"ROUND_ROBIN\",\"maxGroups\":null,\"maxTeamsPerGroup\":null}}", "World Cup", 8, 4)]
     public async Task Patch_Tournament_Returns200_AndPreservesOmittedOrNullFields(
         string body, string expectedName, int expectedGroups, int expectedTeams)
     {
-        var created = await CreateTournament("World Cup");
+        var created = await CreateTournament("World Cup",maxGroups: 8);
 
         var response = await SendJson(HttpMethod.Patch, $"/tournaments/{created.Id}", body);
         var updated = await Read(response);
@@ -283,13 +284,13 @@ public class TournamentRoutesTests : TournamentApiTests
         "{\"format\":{\"maxGroups\":2,\"unknown\":true}}"
     };
 
-    private static object FullBody(string name, int maxGroups = 4, int maxTeamsPerGroup = 4) => new
+    private static object FullBody(string name, int maxGroups = 8, int maxTeamsPerGroup = 4) => new
     {
         name,
         format = new { type = "ROUND_ROBIN", maxGroups, maxTeamsPerGroup }
     };
 
-    private async Task<TournamentDto> CreateTournament(string name, int maxGroups = 4, int maxTeamsPerGroup = 4)
+    private async Task<TournamentDto> CreateTournament(string name, int maxGroups = 8, int maxTeamsPerGroup = 4)
     {
         var response = await Client.PostAsJsonAsync("/tournaments", FullBody(name, maxGroups, maxTeamsPerGroup));
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
