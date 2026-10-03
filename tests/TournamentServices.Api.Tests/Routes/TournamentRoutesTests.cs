@@ -148,7 +148,7 @@ public class TournamentRoutesTests : TournamentApiTests
     public async Task Patch_Tournament_Returns200_AndPreservesOmittedOrNullFields(
         string body, string expectedName, int expectedGroups, int expectedTeams)
     {
-        var created = await CreateTournament("World Cup",maxGroups: 8);
+        var created = await CreateTournament("World Cup");
 
         var response = await SendJson(HttpMethod.Patch, $"/tournaments/{created.Id}", body);
         var updated = await Read(response);
