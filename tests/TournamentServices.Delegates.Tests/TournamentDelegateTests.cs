@@ -86,7 +86,7 @@ public class TournamentDelegateTests
     public async Task UpdateAsync_ReplacesNameAndFormat_WhenTournamentExists()
     {
         var tournament = SetupExistingTournament();
-        var format = new TournamentFormat("ROUND_ROBIN", 12, 6);
+        var format = new TournamentFormat("ROUND_ROBIN", 8, 4);
 
         var result = await _delegate.UpdateAsync(tournament.Id, "Mundial actualizado", format);
 
@@ -114,7 +114,7 @@ public class TournamentDelegateTests
         var tournament = SetupExistingTournament();
 
         await Assert.ThrowsAnyAsync<ArgumentException>(() =>
-            _delegate.UpdateAsync(tournament.Id, name!, new TournamentFormat("ROUND_ROBIN", 12, 6)));
+            _delegate.UpdateAsync(tournament.Id, name!, new TournamentFormat("ROUND_ROBIN", 8, 4)));
 
         AssertUnchanged(tournament);
     }
@@ -148,11 +148,11 @@ public class TournamentDelegateTests
     {
         var tournament = SetupExistingTournament();
 
-        var result = await _delegate.PatchAsync(tournament.Id, null, null, 12, null);
+        var result = await _delegate.PatchAsync(tournament.Id, null, null, 8, null);
 
         Assert.Equal("Mundial 2026", result.Name);
         Assert.Equal("ROUND_ROBIN", result.Format.Type);
-        Assert.Equal(12, result.Format.MaxGroups);
+        Assert.Equal(8, result.Format.MaxGroups);
         Assert.Equal(4, result.Format.MaxTeamsPerGroup);
         _repo.Verify(r => r.UpdateAsync(result, It.IsAny<CancellationToken>()), Times.Once);
     }
@@ -162,12 +162,12 @@ public class TournamentDelegateTests
     {
         var tournament = SetupExistingTournament();
 
-        var result = await _delegate.PatchAsync(tournament.Id, null, null, null, 6);
+        var result = await _delegate.PatchAsync(tournament.Id, null, null, null, 4);
 
         Assert.Equal("Mundial 2026", result.Name);
         Assert.Equal("ROUND_ROBIN", result.Format.Type);
         Assert.Equal(8, result.Format.MaxGroups);
-        Assert.Equal(6, result.Format.MaxTeamsPerGroup);
+        Assert.Equal(4, result.Format.MaxTeamsPerGroup);
         _repo.Verify(r => r.UpdateAsync(result, It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -188,11 +188,11 @@ public class TournamentDelegateTests
     {
         var tournament = SetupExistingTournament();
 
-        var result = await _delegate.PatchAsync(tournament.Id, "Copa nueva", "ROUND_ROBIN", 12, 6);
+        var result = await _delegate.PatchAsync(tournament.Id, "Copa nueva", "ROUND_ROBIN", 8, 4);
 
         Assert.Equal(tournament.Id, result.Id);
         Assert.Equal("Copa nueva", result.Name);
-        Assert.Equal(new TournamentFormat("ROUND_ROBIN", 12, 6), result.Format);
+        Assert.Equal(new TournamentFormat("ROUND_ROBIN", 8, 4), result.Format);
         _repo.Verify(r => r.UpdateAsync(result, It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -225,7 +225,7 @@ public class TournamentDelegateTests
         var tournament = SetupExistingTournament();
 
         await Assert.ThrowsAnyAsync<ArgumentException>(() =>
-            _delegate.PatchAsync(tournament.Id, name, null, 12, 6));
+            _delegate.PatchAsync(tournament.Id, name, null, 8, 4));
 
         AssertUnchanged(tournament);
     }
@@ -233,10 +233,8 @@ public class TournamentDelegateTests
     [Theory]
     [InlineData("KNOCKOUT", null, null)]
     [InlineData("", null, null)]
-    [InlineData(null, 0, null)]
-    [InlineData(null, 17, null)]
-    [InlineData(null, null, 1)]
-    [InlineData(null, null, 9)]
+    [InlineData(null, 7, null)]
+    [InlineData(null, null, 3)]
     public async Task PatchAsync_RejectsInvalidFormat_WithoutChangingNameOrFormat(
         string? formatType, int? maxGroups, int? maxTeamsPerGroup)
     {
