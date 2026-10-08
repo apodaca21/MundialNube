@@ -18,10 +18,10 @@ public sealed record TournamentFormat
             throw new ArgumentException("The supported tournament format is ROUND_ROBIN.", nameof(type));
 
         if (maxGroups < MinGroups || maxGroups > MaxGroupsLimit)
-            throw new ArgumentOutOfRangeException(nameof(maxGroups), "Groups must be between 1 and 16.");
+            throw new ArgumentOutOfRangeException(nameof(maxGroups), "Groups must be of 16.");
 
         if (maxTeamsPerGroup < MinTeamsPerGroup || maxTeamsPerGroup > MaxTeamsPerGroupLimit)
-            throw new ArgumentOutOfRangeException(nameof(maxTeamsPerGroup), "Teams per group must be between 2 and 8.");
+            throw new ArgumentOutOfRangeException(nameof(maxTeamsPerGroup), "Teams per group must be of 8.");
 
         Type = type;
         MaxGroups = maxGroups;
