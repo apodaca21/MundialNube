@@ -84,7 +84,7 @@ public static class TournamentRoutes
         try
         {
             var updated = await tournaments.PatchAsync(tournamentId, dto.Name,
-                dto.Format?.Type, dto.Format?.MaxGroups, dto.Format?.MaxTeamsPerGroup, ct);
+                dto.Format?.Type, dto.Format?.RequiredGroups, dto.Format?.RequiredTeamsPerGroup, ct);
             return TypedResults.Ok(ToDto(updated));
         }
         catch (TournamentNotFoundException)
@@ -113,7 +113,7 @@ public static class TournamentRoutes
         new TournamentFormatDto(tournament.Format.Type, tournament.Format.MaxGroups, tournament.Format.MaxTeamsPerGroup));
 
     private static TournamentFormat ToFormat(TournamentFormatDto format)
-        => new(format.Type, format.MaxGroups, format.MaxTeamsPerGroup);
+        => new(format.Type, format.RequiredGroups, format.RequiredTeamsPerGroup);
 
     private static bool IsValidId(string id) => Regex.IsMatch(id, Tournament.IdPattern);
 
