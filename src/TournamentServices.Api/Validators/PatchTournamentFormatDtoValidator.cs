@@ -10,11 +10,11 @@ public class PatchTournamentFormatDtoValidator : AbstractValidator<PatchTourname
     {
         RuleFor(x => x.Type).Equal(TournamentFormat.RoundRobin)
             .When(x => x.Type is not null).OverridePropertyName("type");
-        RuleFor(x => x.RequiredGroups)
-            .Equal(TournamentFormat.RequiredGroups)
-            .When(x => x.RequiredGroups.HasValue).OverridePropertyName("RequiredGroups");
-        RuleFor(x => x.RequiredTeamsPerGroup)
-            .Equal(TournamentFormat.RequiredTeamsPerGroup)
-            .When(x => x.RequiredTeamsPerGroup.HasValue).OverridePropertyName("RequiredTeamsPerGroup");
+        RuleFor(x => x.MaxGroups)
+            .InclusiveBetween(TournamentFormat.MinGroups, TournamentFormat.MaxGroupsLimit)
+            .When(x => x.MaxGroups.HasValue).OverridePropertyName("maxGroups");
+        RuleFor(x => x.MaxTeamsPerGroup)
+            .InclusiveBetween(TournamentFormat.MinTeamsPerGroup, TournamentFormat.MaxTeamsPerGroupLimit)
+            .When(x => x.MaxTeamsPerGroup.HasValue).OverridePropertyName("maxTeamsPerGroup");
     }
 }
