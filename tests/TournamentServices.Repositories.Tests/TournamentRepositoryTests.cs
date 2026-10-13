@@ -37,7 +37,7 @@ public class TournamentRepositoryTests : IAsyncLifetime
         {
             Id = "world-cup",
             Name = "Mundial 2026",
-            Format = new TournamentFormat(TournamentFormat.RoundRobin, 12, 4)
+            Format = new TournamentFormat(TournamentFormat.RoundRobin, 8, 4)
         };
         await using (var writeDb = CreateContext())
         {
@@ -79,7 +79,7 @@ public class TournamentRepositoryTests : IAsyncLifetime
             {
                 Id = "cup",
                 Name = "Updated",
-                Format = new TournamentFormat(TournamentFormat.RoundRobin, 12, 6)
+                Format = new TournamentFormat(TournamentFormat.RoundRobin, 8, 4)
             });
         }
 
@@ -88,7 +88,7 @@ public class TournamentRepositoryTests : IAsyncLifetime
 
         Assert.NotNull(updated);
         Assert.Equal("Updated", updated.Name);
-        Assert.Equal(new TournamentFormat(TournamentFormat.RoundRobin, 12, 6), updated.Format);
+        Assert.Equal(new TournamentFormat(TournamentFormat.RoundRobin, 8, 4), updated.Format);
     }
 
     [Fact]

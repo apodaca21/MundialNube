@@ -167,7 +167,7 @@ public class TournamentDelegateTests
         Assert.Equal("Mundial 2026", result.Name);
         Assert.Equal("ROUND_ROBIN", result.Format.Type);
         Assert.Equal(8, result.Format.MaxGroups);
-        Assert.Equal(6, result.Format.MaxTeamsPerGroup);
+        Assert.Equal(4, result.Format.MaxTeamsPerGroup);
         _repo.Verify(r => r.UpdateAsync(result, It.IsAny<CancellationToken>()), Times.Once);
     }
 
