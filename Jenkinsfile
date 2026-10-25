@@ -39,5 +39,26 @@ pipeline {
                 '''
             }
         }
+
+        stage('Unit Test') {
+            steps {
+                sh '''
+                    rm -rf TestResults
+
+                    dotnet test TournamentServices.sln \
+                        --configuration "$CONFIGURATION" \
+                        --no-build \
+                        --logger "trx;LogFileName=unit-tests.trx" \
+                        --results-directory TestResults
+                '''
+            }
+
+            post {
+                always {
+                    archiveArtifacts artifacts: 'TestResults/**/*',
+                                     allowEmptyArchive: true
+                }
+            }
+        }
     }
 }
