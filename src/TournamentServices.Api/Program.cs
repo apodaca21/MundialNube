@@ -35,7 +35,7 @@ builder.Services.AddScoped<IValidator<CreateMatchDto>, CreateMatchDtoValidator>(
 builder.Services.AddScoped<IValidator<UpdateScoreDto>, UpdateScoreDtoValidator>();
 
 builder.Services.AddDbContext<TournamentDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("TournamentsConnection")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<ITournamentRepository, TournamentRepository>();
 builder.Services.AddScoped<ITournamentDelegate, TournamentDelegate>();
 builder.Services.AddScoped<IValidator<CreateTournamentDto>, CreateTournamentDtoValidator>();
