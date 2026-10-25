@@ -3,26 +3,39 @@ pipeline {
         label 'build-agent'
     }
 
+    options {
+        skipDefaultCheckout(true)
+    }
+
+    environment {
+        CONFIGURATION = 'Release'
+        REPOSITORY_URL = 'https://github.com/apodaca21/MundialNube.git'
+        REPOSITORY_BRANCH = 'ci/jenkins-activity'
+    }
+
     stages {
-        stage('Build Environment') {
+        stage('Checkout') {
             steps {
-                sh '''
-                    dotnet --info
-                    podman version
-                '''
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: "*/${env.REPOSITORY_BRANCH}"]],
+                    extensions: [],
+                    userRemoteConfigs: [[
+                        url: env.REPOSITORY_URL
+                    ]]
+                ])
+
+                sh 'git log -1 --oneline'
             }
         }
 
-        stage('Deployment Environment') {
-            agent {
-                label 'deploy-agent'
-            }
-
+        stage('Build') {
             steps {
                 sh '''
-                    git --version
-                    kubectl version --client
-                    curl --version
+                    dotnet restore TournamentServices.sln
+                    dotnet build TournamentServices.sln \
+                        --configuration "$CONFIGURATION" \
+                        --no-restore
                 '''
             }
         }
