@@ -42,15 +42,20 @@ pipeline {
 
         stage('Unit Test') {
             steps {
-                sh '''
-                    rm -rf TestResults
+               sh '''
+    		rm -rf TestResults
+    		mkdir -p TestResults
 
-                    dotnet test TournamentServices.sln \
-                        --configuration "$CONFIGURATION" \
-                        --no-build \
-                        --logger "trx;LogFileName=unit-tests.trx" \
-                        --results-directory TestResults
-                '''
+    		for project in tests/*/*.csproj; do
+        		name=$(basename "$project" .csproj)
+
+        		dotnet test "$project" \
+            			--configuration "$CONFIGURATION" \
+            			--no-build \
+            			--logger "trx;LogFileName=${name}.trx" \
+            			--results-directory TestResults
+    			done
+		''' 
             }
 
             post {
