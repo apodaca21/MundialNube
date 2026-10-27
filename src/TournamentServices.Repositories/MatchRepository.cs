@@ -1,60 +1,61 @@
-using System.Collections.Concurrent;
+using Microsoft.EntityFrameworkCore;
 using TournamentServices.Domain;
 
 namespace TournamentServices.Repositories;
 
-public class MatchRepository : IMatchRepository
+public class MatchRepository(TournamentDbContext db) : IMatchRepository
 {
-    private readonly ConcurrentDictionary<string, Match> _matches = new();
-
-    public Task<IReadOnlyList<Match>> GetByTournamentIdAsync(string tournamentId, CancellationToken cancellationToken = default)
-        => Task.FromResult<IReadOnlyList<Match>>(_matches.Values
+    public async Task<IReadOnlyList<Match>> GetByTournamentIdAsync(string tournamentId, CancellationToken cancellationToken = default)
+    {
+        return await db.Matches.AsNoTracking()
             .Where(match => match.TournamentId == tournamentId)
             .OrderBy(match => match.Id)
-            .Select(Copy)
-            .ToList());
+            .ToListAsync(cancellationToken);
+    }
 
     public Task<Match?> GetByIdAsync(string tournamentId, string matchId, CancellationToken cancellationToken = default)
-        => Task.FromResult(_matches.TryGetValue(matchId, out var match) && match.TournamentId == tournamentId
-            ? Copy(match)
-            : null);
+    {
+        return db.Matches.AsNoTracking()
+            .FirstOrDefaultAsync(match => match.Id == matchId && match.TournamentId == tournamentId, cancellationToken);
+    }
 
-    public Task<IReadOnlyList<Match>> GetByGroupIdAsync(string groupId, CancellationToken cancellationToken = default)
-        => Task.FromResult<IReadOnlyList<Match>>(_matches.Values
+    public async Task<IReadOnlyList<Match>> GetByGroupIdAsync(string groupId, CancellationToken cancellationToken = default)
+    {
+        return await db.Matches.AsNoTracking()
             .Where(match => match.GroupId == groupId)
             .OrderBy(match => match.Id)
-            .Select(Copy)
-            .ToList());
-
-    public Task AddAsync(Match match, CancellationToken cancellationToken = default)
-    {
-        if (!_matches.TryAdd(match.Id, Copy(match)))
-            throw new InvalidOperationException($"A match with id '{match.Id}' already exists.");
-
-        return Task.CompletedTask;
+            .ToListAsync(cancellationToken);
     }
 
-    public Task UpdateAsync(Match match, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<Match>> GetByTeamIdAsync(string teamId, CancellationToken cancellationToken = default)
     {
-        if (!_matches.ContainsKey(match.Id))
-            throw new KeyNotFoundException($"Match '{match.Id}' was not found.");
-
-        _matches[match.Id] = Copy(match);
-        return Task.CompletedTask;
+        return await db.Matches.AsNoTracking()
+            .Where(match => match.HomeTeamId == teamId || match.VisitorTeamId == teamId)
+            .ToListAsync(cancellationToken);
     }
 
-    public Task DeleteAsync(string matchId, CancellationToken cancellationToken = default)
+    public async Task AddAsync(Match match, CancellationToken cancellationToken = default)
     {
-        _matches.TryRemove(matchId, out _);
-        return Task.CompletedTask;
+        db.Matches.Add(match);
+        await db.SaveChangesAsync(cancellationToken);
     }
 
-    private static Match Copy(Match match)
+    public async Task UpdateAsync(Match match, CancellationToken cancellationToken = default)
     {
-        var copy = new Match(match.Id, match.TournamentId, match.GroupId, match.HomeTeamId, match.VisitorTeamId);
-        if (match.IsCompleted)
-            copy.UpdateScore(new Score(match.Score.HomeTeamScore, match.Score.VisitorTeamScore));
+        var stored = await db.Matches.FindAsync([match.Id], cancellationToken)
+            ?? throw new KeyNotFoundException($"Match '{match.Id}' was not found.");
 
-        return copy;
+        stored.UpdateScore(match.Score);
+        await db.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task DeleteAsync(string matchId, CancellationToken cancellationToken = default)
+    {
+        var stored = await db.Matches.FindAsync([matchId], cancellationToken);
+        if (stored is null)
+            return;
+
+        db.Matches.Remove(stored);
+        await db.SaveChangesAsync(cancellationToken);
     }
 }

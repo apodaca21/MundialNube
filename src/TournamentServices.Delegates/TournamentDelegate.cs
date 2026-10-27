@@ -24,6 +24,7 @@ public class TournamentDelegate : ITournamentDelegate
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
         ArgumentNullException.ThrowIfNull(format);
+        await EnsureUniqueName(name, null, cancellationToken);
 
         var tournament = new Tournament { Name = name, Format = format };
         await _repo.AddAsync(tournament, cancellationToken);
@@ -38,6 +39,7 @@ public class TournamentDelegate : ITournamentDelegate
 
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
         ArgumentNullException.ThrowIfNull(format);
+        await EnsureUniqueName(name, id, cancellationToken);
 
         tournament.Name = name;
         tournament.Format = format;
@@ -53,7 +55,8 @@ public class TournamentDelegate : ITournamentDelegate
 
         var updatedName = name ?? tournament.Name;
         ArgumentException.ThrowIfNullOrWhiteSpace(updatedName);
-        // Validate the complete format before changing the stored tournament.
+        await EnsureUniqueName(updatedName, id, cancellationToken);
+
         var updatedFormat = new TournamentFormat(
             formatType ?? tournament.Format.Type,
             maxGroups ?? tournament.Format.MaxGroups,
@@ -69,5 +72,12 @@ public class TournamentDelegate : ITournamentDelegate
     {
         if (!await _repo.DeleteAsync(id, cancellationToken))
             throw new TournamentNotFoundException(id);
+    }
+
+    private async Task EnsureUniqueName(string name, string? currentId, CancellationToken cancellationToken)
+    {
+        var existing = await _repo.GetByNameAsync(name, cancellationToken);
+        if (existing != null && existing.Id != currentId)
+            throw new DuplicateTournamentNameException(name);
     }
 }

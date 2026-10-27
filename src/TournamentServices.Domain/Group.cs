@@ -2,9 +2,11 @@ namespace TournamentServices.Domain;
 
 public class Group
 {
-    private readonly List<string> _teamIds = [];
-
     public const string IdPattern = Team.IdPattern;
+
+    private Group()
+    {
+    }
 
     public Group(string id, string name, string tournamentId)
     {
@@ -13,16 +15,17 @@ public class Group
         TournamentId = tournamentId;
     }
 
-    public string Id { get; }
-    public string Name { get; private set; }
-    public string TournamentId { get; }
-    public IReadOnlyList<string> TeamIds => _teamIds;
+    public string Id { get; private set; } = string.Empty;
+    public string Name { get; private set; } = string.Empty;
+    public string TournamentId { get; private set; } = string.Empty;
+    public List<string> TeamIds { get; private set; } = [];
 
     public void Rename(string name) => Name = name;
 
     public void AssignTeams(IEnumerable<string> teamIds)
     {
-        _teamIds.Clear();
-        _teamIds.AddRange(teamIds);
+        var next = teamIds.ToList();
+        TeamIds.Clear();
+        TeamIds.AddRange(next);
     }
 }

@@ -12,6 +12,8 @@ public class TournamentDelegateTests
 
     public TournamentDelegateTests()
     {
+        _repo.Setup(r => r.GetByNameAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Tournament?)null);
         _delegate = new TournamentDelegate(_repo.Object);
     }
 
@@ -52,7 +54,7 @@ public class TournamentDelegateTests
     [Fact]
     public async Task CreateAsync_GeneratesId_AndSavesTournament()
     {
-        var format = new TournamentFormat("ROUND_ROBIN", 8, 4);
+        var format = new TournamentFormat("FIFA", 8, 4);
 
         var result = await _delegate.CreateAsync("Mundial 2026", format);
 
@@ -60,6 +62,19 @@ public class TournamentDelegateTests
         Assert.Equal("Mundial 2026", result.Name);
         Assert.Equal(format, result.Format);
         _repo.Verify(r => r.AddAsync(result, It.IsAny<CancellationToken>()), Times.Once);
+        _repo.Verify(r => r.GetByNameAsync("Mundial 2026", It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task CreateAsync_RejectsDuplicateName_WithoutSaving()
+    {
+        _repo.Setup(r => r.GetByNameAsync("Mundial 2026", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(NewTournament());
+
+        await Assert.ThrowsAsync<DuplicateTournamentNameException>(() =>
+            _delegate.CreateAsync("Mundial 2026", new TournamentFormat("FIFA", 8, 4)));
+
+        _repo.Verify(r => r.AddAsync(It.IsAny<Tournament>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Theory]
@@ -69,7 +84,7 @@ public class TournamentDelegateTests
     public async Task CreateAsync_RejectsEmptyName_WithoutSaving(string? name)
     {
         await Assert.ThrowsAnyAsync<ArgumentException>(() =>
-            _delegate.CreateAsync(name!, new TournamentFormat("ROUND_ROBIN", 8, 4)));
+            _delegate.CreateAsync(name!, new TournamentFormat("FIFA", 8, 4)));
 
         _repo.Verify(r => r.AddAsync(It.IsAny<Tournament>(), It.IsAny<CancellationToken>()), Times.Never);
     }
@@ -86,7 +101,7 @@ public class TournamentDelegateTests
     public async Task UpdateAsync_ReplacesNameAndFormat_WhenTournamentExists()
     {
         var tournament = SetupExistingTournament();
-        var format = new TournamentFormat("ROUND_ROBIN", 8, 4);
+        var format = new TournamentFormat("FIFA", 8, 4);
 
         var result = await _delegate.UpdateAsync(tournament.Id, "Mundial actualizado", format);
 
@@ -100,7 +115,7 @@ public class TournamentDelegateTests
     public async Task UpdateAsync_ThrowsNotFound_WithoutSaving()
     {
         await Assert.ThrowsAsync<TournamentNotFoundException>(() =>
-            _delegate.UpdateAsync("missing", "Mundial", new TournamentFormat("ROUND_ROBIN", 8, 4)));
+            _delegate.UpdateAsync("missing", "Mundial", new TournamentFormat("FIFA", 8, 4)));
 
         _repo.Verify(r => r.UpdateAsync(It.IsAny<Tournament>(), It.IsAny<CancellationToken>()), Times.Never);
     }
@@ -114,7 +129,7 @@ public class TournamentDelegateTests
         var tournament = SetupExistingTournament();
 
         await Assert.ThrowsAnyAsync<ArgumentException>(() =>
-            _delegate.UpdateAsync(tournament.Id, name!, new TournamentFormat("ROUND_ROBIN", 8, 4)));
+            _delegate.UpdateAsync(tournament.Id, name!, new TournamentFormat("FIFA", 8, 4)));
 
         AssertUnchanged(tournament);
     }
@@ -151,7 +166,7 @@ public class TournamentDelegateTests
         var result = await _delegate.PatchAsync(tournament.Id, null, null, 8, null);
 
         Assert.Equal("Mundial 2026", result.Name);
-        Assert.Equal("ROUND_ROBIN", result.Format.Type);
+        Assert.Equal("FIFA", result.Format.Type);
         Assert.Equal(8, result.Format.MaxGroups);
         Assert.Equal(4, result.Format.MaxTeamsPerGroup);
         _repo.Verify(r => r.UpdateAsync(result, It.IsAny<CancellationToken>()), Times.Once);
@@ -165,7 +180,7 @@ public class TournamentDelegateTests
         var result = await _delegate.PatchAsync(tournament.Id, null, null, null, 4);
 
         Assert.Equal("Mundial 2026", result.Name);
-        Assert.Equal("ROUND_ROBIN", result.Format.Type);
+        Assert.Equal("FIFA", result.Format.Type);
         Assert.Equal(8, result.Format.MaxGroups);
         Assert.Equal(4, result.Format.MaxTeamsPerGroup);
         _repo.Verify(r => r.UpdateAsync(result, It.IsAny<CancellationToken>()), Times.Once);
@@ -176,10 +191,10 @@ public class TournamentDelegateTests
     {
         var tournament = SetupExistingTournament();
 
-        var result = await _delegate.PatchAsync(tournament.Id, null, "ROUND_ROBIN", null, null);
+        var result = await _delegate.PatchAsync(tournament.Id, null, "FIFA", null, null);
 
         Assert.Equal("Mundial 2026", result.Name);
-        Assert.Equal(new TournamentFormat("ROUND_ROBIN", 8, 4), result.Format);
+        Assert.Equal(new TournamentFormat("FIFA", 8, 4), result.Format);
         _repo.Verify(r => r.UpdateAsync(result, It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -188,11 +203,11 @@ public class TournamentDelegateTests
     {
         var tournament = SetupExistingTournament();
 
-        var result = await _delegate.PatchAsync(tournament.Id, "Copa nueva", "ROUND_ROBIN", 8, 4);
+        var result = await _delegate.PatchAsync(tournament.Id, "Copa nueva", "FIFA", 8, 4);
 
         Assert.Equal(tournament.Id, result.Id);
         Assert.Equal("Copa nueva", result.Name);
-        Assert.Equal(new TournamentFormat("ROUND_ROBIN", 8, 4), result.Format);
+        Assert.Equal(new TournamentFormat("FIFA", 8, 4), result.Format);
         _repo.Verify(r => r.UpdateAsync(result, It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -205,7 +220,7 @@ public class TournamentDelegateTests
 
         Assert.Equal(tournament.Id, result.Id);
         Assert.Equal("Mundial 2026", result.Name);
-        Assert.Equal(new TournamentFormat("ROUND_ROBIN", 8, 4), result.Format);
+        Assert.Equal(new TournamentFormat("FIFA", 8, 4), result.Format);
     }
 
     [Fact]
@@ -232,6 +247,8 @@ public class TournamentDelegateTests
 
     [Theory]
     [InlineData("KNOCKOUT", null, null)]
+    [InlineData("NFL", null, null)]
+    [InlineData("ROUND_ROBIN", null, null)]
     [InlineData("", null, null)]
     [InlineData(null, 0, null)]
     [InlineData(null, 17, null)]
@@ -288,6 +305,7 @@ public class TournamentDelegateTests
 
         _repo.Verify(r => r.GetAllAsync(token), Times.Once);
         _repo.Verify(r => r.GetByIdAsync(tournament.Id, token), Times.Exactly(3));
+        _repo.Verify(r => r.GetByNameAsync(It.IsAny<string>(), token), Times.Exactly(3));
         _repo.Verify(r => r.AddAsync(It.IsAny<Tournament>(), token), Times.Once);
         _repo.Verify(r => r.UpdateAsync(tournament, token), Times.Exactly(2));
         _repo.Verify(r => r.DeleteAsync(tournament.Id, token), Times.Once);
@@ -306,13 +324,13 @@ public class TournamentDelegateTests
     {
         Id = "tournament-1",
         Name = "Mundial 2026",
-        Format = new TournamentFormat("ROUND_ROBIN", 8, 4)
+        Format = new TournamentFormat("FIFA", 8, 4)
     };
 
     private void AssertUnchanged(Tournament tournament)
     {
         Assert.Equal("Mundial 2026", tournament.Name);
-        Assert.Equal(new TournamentFormat("ROUND_ROBIN", 8, 4), tournament.Format);
+        Assert.Equal(new TournamentFormat("FIFA", 8, 4), tournament.Format);
         _repo.Verify(r => r.UpdateAsync(It.IsAny<Tournament>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 }

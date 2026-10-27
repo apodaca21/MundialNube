@@ -8,14 +8,24 @@ public class TournamentRepository(TournamentDbContext db) : ITournamentRepositor
 {
     public async Task<IReadOnlyList<Tournament>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        return await db.Tournaments.AsNoTracking().OrderBy(tournament => tournament.Id)
+        return await WithChildren(db.Tournaments)
+            .AsNoTracking()
+            .OrderBy(tournament => tournament.Id)
             .ToListAsync(cancellationToken);
     }
 
     public Task<Tournament?> GetByIdAsync(string id, CancellationToken cancellationToken = default)
     {
-        return db.Tournaments.AsNoTracking()
+        return WithChildren(db.Tournaments)
+            .AsNoTracking()
             .FirstOrDefaultAsync(tournament => tournament.Id == id, cancellationToken);
+    }
+
+    public Task<Tournament?> GetByNameAsync(string name, CancellationToken cancellationToken = default)
+    {
+        var normalized = name.ToLower();
+        return db.Tournaments.AsNoTracking()
+            .FirstOrDefaultAsync(tournament => tournament.Name.ToLower() == normalized, cancellationToken);
     }
 
     public async Task AddAsync(Tournament tournament, CancellationToken cancellationToken = default)
@@ -36,9 +46,12 @@ public class TournamentRepository(TournamentDbContext db) : ITournamentRepositor
 
     public async Task<bool> DeleteAsync(string id, CancellationToken cancellationToken = default)
     {
-        // SQLite elimina también los grupos y sus partidos mediante las claves foráneas.
         var deleted = await db.Tournaments.Where(tournament => tournament.Id == id)
             .ExecuteDeleteAsync(cancellationToken);
         return deleted > 0;
     }
+
+    private static IQueryable<Tournament> WithChildren(IQueryable<Tournament> query)
+        => query.Include(tournament => tournament.Groups)
+            .Include(tournament => tournament.Matches);
 }

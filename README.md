@@ -353,6 +353,7 @@ Actualmente deben existir:
 ```text
 Groups
 Matches
+Teams
 Tournaments
 ```
 
@@ -363,6 +364,7 @@ El resultado debe ser similar a:
 --------+-------------+-------+----------------
  public | Groups      | table | tournament_svc
  public | Matches     | table | tournament_svc
+ public | Teams       | table | tournament_svc
  public | Tournaments | table | tournament_svc
 ```
 
@@ -496,6 +498,7 @@ PostgreSQL 18.6
 tournament_db
        │
        ├── Tournaments
+       ├── Teams
        ├── Groups
        └── Matches
 ```
@@ -552,6 +555,13 @@ podman compose down
 ---
 
 ## Nota sobre migraciones
+
+Si la base ya existia de una version anterior, hay que recrearla porque ahora tambien se guardan equipos, grupos y partidos:
+
+```bash
+podman compose down -v
+podman compose up -d
+```
 
 Actualmente el proyecto utiliza `EnsureCreatedAsync()` para crear el esquema inicial de PostgreSQL.
 

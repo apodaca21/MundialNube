@@ -37,7 +37,7 @@ public class TournamentRepositoryTests : IAsyncLifetime
         {
             Id = "world-cup",
             Name = "Mundial 2026",
-            Format = new TournamentFormat(TournamentFormat.RoundRobin, 8, 4)
+            Format = new TournamentFormat(TournamentFormat.Fifa, 8, 4)
         };
         await using (var writeDb = CreateContext())
         {
@@ -79,7 +79,7 @@ public class TournamentRepositoryTests : IAsyncLifetime
             {
                 Id = "cup",
                 Name = "Updated",
-                Format = new TournamentFormat(TournamentFormat.RoundRobin, 8, 4)
+                Format = new TournamentFormat(TournamentFormat.Fifa, 8, 4)
             });
         }
 
@@ -88,7 +88,7 @@ public class TournamentRepositoryTests : IAsyncLifetime
 
         Assert.NotNull(updated);
         Assert.Equal("Updated", updated.Name);
-        Assert.Equal(new TournamentFormat(TournamentFormat.RoundRobin, 8, 4), updated.Format);
+        Assert.Equal(new TournamentFormat(TournamentFormat.Fifa, 8, 4), updated.Format);
     }
 
     [Fact]
@@ -131,14 +131,14 @@ public class TournamentRepositoryTests : IAsyncLifetime
                 new Tournament { Id = "delete-cup", Name = "Delete" },
                 new Tournament { Id = "keep-cup", Name = "Keep" });
             seedDb.Groups.AddRange(
-                new TournamentGroup { Id = "delete-a", TournamentId = "delete-cup", Name = "A" },
-                new TournamentGroup { Id = "delete-b", TournamentId = "delete-cup", Name = "B" },
-                new TournamentGroup { Id = "keep-a", TournamentId = "keep-cup", Name = "A" });
+                new Group("delete-a", "A", "delete-cup"),
+                new Group("delete-b", "B", "delete-cup"),
+                new Group("keep-a", "A", "keep-cup"));
             seedDb.Matches.AddRange(
-                new TournamentMatch { Id = "delete-match-1", GroupId = "delete-a" },
-                new TournamentMatch { Id = "delete-match-2", GroupId = "delete-a" },
-                new TournamentMatch { Id = "delete-match-3", GroupId = "delete-b" },
-                new TournamentMatch { Id = "keep-match", GroupId = "keep-a" });
+                new Match("delete-match-1", "delete-cup", "delete-a", "home-1", "away-1"),
+                new Match("delete-match-2", "delete-cup", "delete-a", "home-2", "away-2"),
+                new Match("delete-match-3", "delete-cup", "delete-b", "home-3", "away-3"),
+                new Match("keep-match", "keep-cup", "keep-a", "home-4", "away-4"));
             await seedDb.SaveChangesAsync();
         }
 
@@ -155,19 +155,38 @@ public class TournamentRepositoryTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task GetByNameAsync_FindsTournamentIgnoringCase()
+    {
+        await using (var writeDb = CreateContext())
+        {
+            await new TournamentRepository(writeDb).AddAsync(new Tournament
+            {
+                Id = "cup",
+                Name = "Mundial 2026"
+            });
+        }
+
+        await using var readDb = CreateContext();
+        var stored = await new TournamentRepository(readDb).GetByNameAsync("mundial 2026");
+
+        Assert.NotNull(stored);
+        Assert.Equal("cup", stored.Id);
+    }
+
+    [Fact]
     public async Task SaveChangesAsync_RejectsGroupWithoutTournament()
     {
         await using var db = CreateContext();
-        db.Groups.Add(new TournamentGroup { TournamentId = "missing", Name = "A" });
+        db.Groups.Add(new Group("group-1", "A", "missing"));
 
         await Assert.ThrowsAsync<DbUpdateException>(() => db.SaveChangesAsync());
     }
 
     [Fact]
-    public async Task SaveChangesAsync_RejectsMatchWithoutGroup()
+    public async Task SaveChangesAsync_RejectsMatchWithoutTournament()
     {
         await using var db = CreateContext();
-        db.Matches.Add(new TournamentMatch { GroupId = "missing" });
+        db.Matches.Add(new Match("match-1", "missing", null, "home", "away"));
 
         await Assert.ThrowsAsync<DbUpdateException>(() => db.SaveChangesAsync());
     }

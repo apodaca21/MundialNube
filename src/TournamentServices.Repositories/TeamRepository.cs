@@ -1,56 +1,52 @@
-using System.Collections.Concurrent;
+using Microsoft.EntityFrameworkCore;
 using TournamentServices.Domain;
 
 namespace TournamentServices.Repositories;
 
-public class TeamRepository : ITeamRepository
+public class TeamRepository(TournamentDbContext db) : ITeamRepository
 {
-    private readonly ConcurrentDictionary<string, Team> _teams = new();
-
-    public Task<IReadOnlyList<Team>> GetAllAsync(CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<Team>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        return Task.FromResult<IReadOnlyList<Team>>(_teams.Values.Select(Copy).ToList());
+        return await db.Teams.AsNoTracking()
+            .OrderBy(team => team.Id)
+            .ToListAsync(cancellationToken);
     }
 
     public Task<Team?> GetByIdAsync(string id, CancellationToken cancellationToken = default)
     {
-        return Task.FromResult(_teams.TryGetValue(id, out var team) ? Copy(team) : null);
+        return db.Teams.AsNoTracking()
+            .FirstOrDefaultAsync(team => team.Id == id, cancellationToken);
     }
 
     public Task<Team?> GetByNameAsync(string name, CancellationToken cancellationToken = default)
     {
-        var team = _teams.Values.FirstOrDefault(t =>
-            t.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
-
-        return Task.FromResult(team == null ? null : Copy(team));
+        var normalized = name.ToLower();
+        return db.Teams.AsNoTracking()
+            .FirstOrDefaultAsync(team => team.Name.ToLower() == normalized, cancellationToken);
     }
 
-    public Task AddAsync(Team team, CancellationToken cancellationToken = default)
+    public async Task AddAsync(Team team, CancellationToken cancellationToken = default)
     {
-        if (!_teams.TryAdd(team.Id, Copy(team)))
-            throw new InvalidOperationException($"A team with id '{team.Id}' already exists.");
-
-        return Task.CompletedTask;
+        db.Teams.Add(team);
+        await db.SaveChangesAsync(cancellationToken);
     }
 
-    public Task UpdateAsync(Team team, CancellationToken cancellationToken = default)
+    public async Task UpdateAsync(Team team, CancellationToken cancellationToken = default)
     {
-        if (!_teams.ContainsKey(team.Id))
-            throw new KeyNotFoundException($"Team '{team.Id}' was not found.");
+        var stored = await db.Teams.FindAsync([team.Id], cancellationToken)
+            ?? throw new KeyNotFoundException($"Team '{team.Id}' was not found.");
 
-        _teams[team.Id] = Copy(team);
-        return Task.CompletedTask;
+        stored.Name = team.Name;
+        await db.SaveChangesAsync(cancellationToken);
     }
 
-    public Task DeleteAsync(string id, CancellationToken cancellationToken = default)
+    public async Task DeleteAsync(string id, CancellationToken cancellationToken = default)
     {
-        _teams.TryRemove(id, out _);
-        return Task.CompletedTask;
-    }
+        var stored = await db.Teams.FindAsync([id], cancellationToken);
+        if (stored is null)
+            return;
 
-    private static Team Copy(Team team) => new()
-    {
-        Id = team.Id,
-        Name = team.Name
-    };
+        db.Teams.Remove(stored);
+        await db.SaveChangesAsync(cancellationToken);
+    }
 }

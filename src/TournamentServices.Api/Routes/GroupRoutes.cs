@@ -31,7 +31,8 @@ public static class GroupRoutes
         try
         {
             var result = await groups.GetByTournamentAsync(tournamentId, cancellationToken);
-            return TypedResults.Ok(await Task.WhenAll(result.Select(group => ToDto(group, teams, cancellationToken))));
+            var lookup = await TeamLookup(teams, cancellationToken);
+            return TypedResults.Ok(result.Select(group => ToDto(group, lookup)).ToList());
         }
         catch (TournamentNotFoundException)
         {
@@ -50,7 +51,7 @@ public static class GroupRoutes
         var result = await groups.GetByIdAsync(tournamentId, groupId, cancellationToken);
         return result is null
             ? TypedResults.NotFound()
-            : TypedResults.Ok(await ToDto(result, teams, cancellationToken));
+            : TypedResults.Ok(ToDto(result, await TeamLookup(teams, cancellationToken)));
     }
 
     private static async Task<IResult> Create(string tournamentId, CreateGroupDto dto, IGroupDelegate groups,
@@ -68,7 +69,7 @@ public static class GroupRoutes
             var id = await groups.CreateAsync(tournamentId, dto.Name!, cancellationToken);
             var created = await groups.GetByIdAsync(tournamentId, id, cancellationToken);
             return TypedResults.Created($"/tournaments/{tournamentId}/groups/{id}",
-                await ToDto(created!, teams: null, cancellationToken));
+                ToDto(created!, new Dictionary<string, Team>()));
         }
         catch (TournamentNotFoundException)
         {
@@ -100,7 +101,7 @@ public static class GroupRoutes
         try
         {
             var updated = await groups.UpdateAsync(tournamentId, groupId, dto.Name!, cancellationToken);
-            return TypedResults.Ok(await ToDto(updated, teams, cancellationToken));
+            return TypedResults.Ok(ToDto(updated, await TeamLookup(teams, cancellationToken)));
         }
         catch (GroupNotFoundException)
         {
@@ -178,15 +179,17 @@ public static class GroupRoutes
         }
     }
 
-    private static async Task<GroupDto> ToDto(DomainGroup group, ITeamDelegate? teams, CancellationToken cancellationToken)
+    private static async Task<Dictionary<string, Team>> TeamLookup(ITeamDelegate teams, CancellationToken cancellationToken)
     {
-        if (teams is null)
-            return new GroupDto(group.Id, group.Name, group.TournamentId, []);
-
-        var teamResults = await Task.WhenAll(group.TeamIds.Select(teamId => teams.GetByIdAsync(teamId, cancellationToken)));
-        return new GroupDto(group.Id, group.Name, group.TournamentId,
-            teamResults.Where(team => team is not null).Select(team => new TeamDto(team!.Id, team.Name)).ToList());
+        var all = await teams.GetAllAsync(cancellationToken);
+        return all.ToDictionary(team => team.Id);
     }
+
+    private static GroupDto ToDto(DomainGroup group, IReadOnlyDictionary<string, Team> teams)
+        => new(group.Id, group.Name, group.TournamentId,
+            group.TeamIds.Where(teams.ContainsKey)
+                .Select(id => new TeamDto(teams[id].Id, teams[id].Name))
+                .ToList());
 
     private static bool IsValidId(string id) => Regex.IsMatch(id, Team.IdPattern);
 

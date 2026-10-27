@@ -8,7 +8,10 @@ public class TournamentFormatDtoValidator : AbstractValidator<TournamentFormatDt
 {
     public TournamentFormatDtoValidator()
     {
-        RuleFor(x => x.Type).Equal(TournamentFormat.RoundRobin).OverridePropertyName("type");
+        RuleFor(x => x.Type)
+            .Must(type => type == TournamentFormat.Fifa)
+            .WithMessage("The supported tournament format is FIFA.")
+            .OverridePropertyName("type");
         RuleFor(x => x.MaxGroups)
             .InclusiveBetween(TournamentFormat.MinGroups, TournamentFormat.MaxGroupsLimit)
             .OverridePropertyName("maxGroups");

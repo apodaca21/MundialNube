@@ -102,6 +102,10 @@ public static class TeamRoutes
         {
             return TypedResults.NotFound();
         }
+        catch (TeamInUseException ex)
+        {
+            return TypedResults.Problem(ex.Message, statusCode: StatusCodes.Status422UnprocessableEntity);
+        }
     }
 
     private static TeamDto ToDto(Team team) => new(team.Id, team.Name);

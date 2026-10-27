@@ -6,5 +6,7 @@ public class Tournament
 
     public string Id { get; set; } = Guid.NewGuid().ToString();
     public string Name { get; set; } = string.Empty;
-    public TournamentFormat Format { get; set; } = new(TournamentFormat.RoundRobin, 8, 4);
+    public TournamentFormat Format { get; set; } = new(TournamentFormat.Fifa, 8, 4);
+    public List<Group> Groups { get; set; } = [];
+    public List<Match> Matches { get; set; } = [];
 }

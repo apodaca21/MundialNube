@@ -2,7 +2,12 @@ using System.Text.Json.Serialization;
 
 namespace TournamentServices.Api.Dtos;
 
-public record TournamentDto(string Id, string Name, TournamentFormatDto Format);
+public record TournamentDto(
+    string Id,
+    string Name,
+    TournamentFormatDto Format,
+    IReadOnlyList<GroupDto> Groups,
+    IReadOnlyList<MatchDto> Matches);
 
 [JsonUnmappedMemberHandling(JsonUnmappedMemberHandling.Disallow)]
 public record TournamentFormatDto(string Type, int MaxGroups, int MaxTeamsPerGroup);

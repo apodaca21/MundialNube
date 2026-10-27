@@ -42,20 +42,21 @@ pipeline {
 
         stage('Unit Test') {
             steps {
-               sh '''
-    		rm -rf TestResults
-    		mkdir -p TestResults
+                sh '''
+                    rm -rf TestResults
+                    mkdir -p TestResults
 
-    		for project in tests/*/*.csproj; do
-        		name=$(basename "$project" .csproj)
+                    for project in tests/*/*.csproj; do
+                        name=$(basename "$project" .csproj)
 
-        		dotnet test "$project" \
-            			--configuration "$CONFIGURATION" \
-            			--no-build \
-            			--logger "trx;LogFileName=${name}.trx" \
-            			--results-directory TestResults
-    			done
-		''' 
+                        dotnet test "$project" \
+                            --configuration "$CONFIGURATION" \
+                            --no-build \
+                            --collect:"XPlat Code Coverage" \
+                            --logger "trx;LogFileName=${name}.trx" \
+                            --results-directory TestResults
+                    done
+                '''
             }
 
             post {

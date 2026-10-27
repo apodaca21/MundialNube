@@ -9,11 +9,17 @@ namespace TournamentServices.Delegates.Tests;
 public class TeamDelegateTests
 {
     private readonly Mock<ITeamRepository> _repo = new();
+    private readonly Mock<IGroupRepository> _groups = new();
+    private readonly Mock<IMatchRepository> _matches = new();
     private readonly TeamDelegate _delegate;
 
     public TeamDelegateTests()
     {
-        _delegate = new TeamDelegate(_repo.Object);
+        _groups.Setup(r => r.FindByTeamIdAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Group?)null);
+        _matches.Setup(r => r.GetByTeamIdAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Array.Empty<Domain.Match>());
+        _delegate = new TeamDelegate(_repo.Object, _groups.Object, _matches.Object);
     }
 
     [Fact]
@@ -152,5 +158,17 @@ public class TeamDelegateTests
             .ReturnsAsync((Team?)null);
 
         await Assert.ThrowsAsync<TeamNotFoundException>(() => _delegate.DeleteAsync("missing-team"));
+    }
+
+    [Fact]
+    public async Task DeleteAsync_Throws_WhenTeamIsAssignedToAGroup()
+    {
+        _repo.Setup(r => r.GetByIdAsync("team-1", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Team { Id = "team-1", Name = "Mexico" });
+        _groups.Setup(r => r.FindByTeamIdAsync("team-1", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Group("group-1", "Group A", "cup-1"));
+
+        await Assert.ThrowsAsync<TeamInUseException>(() => _delegate.DeleteAsync("team-1"));
+        _repo.Verify(r => r.DeleteAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 }

@@ -20,12 +20,13 @@ builder.Services.AddProblemDetails();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddSingleton<ITeamRepository, TeamRepository>();
-builder.Services.AddSingleton<IGroupRepository, GroupRepository>();
-builder.Services.AddSingleton<IMatchRepository, MatchRepository>();
+builder.Services.AddScoped<ITeamRepository, TeamRepository>();
+builder.Services.AddScoped<IGroupRepository, GroupRepository>();
+builder.Services.AddScoped<IMatchRepository, MatchRepository>();
 builder.Services.AddScoped<ITeamDelegate, TeamDelegate>();
 builder.Services.AddScoped<IGroupDelegate, GroupDelegate>();
 builder.Services.AddScoped<IMatchDelegate, MatchDelegate>();
+builder.Services.AddScoped<IMundialDelegate, MundialDelegate>();
 builder.Services.AddScoped<IValidator<CreateTeamDto>, CreateTeamDtoValidator>();
 builder.Services.AddScoped<IValidator<UpdateTeamDto>, UpdateTeamDtoValidator>();
 builder.Services.AddScoped<IValidator<CreateGroupDto>, CreateGroupDtoValidator>();
@@ -49,6 +50,13 @@ using (var scope = app.Services.CreateScope())
 {
     var database = scope.ServiceProvider.GetRequiredService<TournamentDbContext>();
     await database.Database.EnsureCreatedAsync();
+    if (database.Database.ProviderName == "Npgsql.EntityFrameworkCore.PostgreSQL")
+    {
+        await database.Database.ExecuteSqlRawAsync(
+            """ALTER TABLE "Matches" ADD COLUMN IF NOT EXISTS "Stage" text NOT NULL DEFAULT 'GROUP';""");
+        await database.Database.ExecuteSqlRawAsync(
+            """UPDATE "Tournaments" SET "Format_Type" = 'FIFA' WHERE "Format_Type" IS DISTINCT FROM 'FIFA';""");
+    }
 }
 
 if (app.Environment.IsDevelopment())
@@ -57,11 +65,15 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
 app.MapGet("/health", () => TypedResults.Ok("Services running"));
 app.MapTeamRoutes();
 app.MapTournamentRoutes();
 app.MapGroupRoutes();
 app.MapMatchRoutes();
+app.MapMundialRoutes();
 
 app.Run();
 

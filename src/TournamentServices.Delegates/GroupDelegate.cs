@@ -66,6 +66,10 @@ public class GroupDelegate(
         {
             if (await teamRepository.GetByIdAsync(teamId, cancellationToken) is null)
                 throw new TeamNotFoundException(teamId);
+
+            var owner = await groupRepository.FindByTeamIdAsync(teamId, cancellationToken);
+            if (owner is not null && owner.Id != groupId)
+                throw new GroupRuleViolationException("A team cannot be assigned to more than one group.");
         }
 
         group.AssignTeams(teamIds);

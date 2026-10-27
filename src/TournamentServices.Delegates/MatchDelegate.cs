@@ -36,6 +36,14 @@ public class MatchDelegate(
             if (!group.TeamIds.Contains(homeTeamId) || !group.TeamIds.Contains(visitorTeamId))
                 throw new MatchRuleViolationException("Both teams must be assigned to the match group.");
         }
+        else
+        {
+            var teamsInTournament = (await groupRepository.GetByTournamentIdAsync(tournamentId, cancellationToken))
+                .SelectMany(group => group.TeamIds)
+                .ToHashSet(StringComparer.Ordinal);
+            if (!teamsInTournament.Contains(homeTeamId) || !teamsInTournament.Contains(visitorTeamId))
+                throw new MatchRuleViolationException("Both teams must belong to the tournament.");
+        }
 
         var match = new Match(Guid.NewGuid().ToString(), tournamentId, groupId, homeTeamId, visitorTeamId);
         await matchRepository.AddAsync(match, cancellationToken);

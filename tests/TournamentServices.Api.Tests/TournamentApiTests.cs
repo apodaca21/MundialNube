@@ -38,8 +38,6 @@ public class TournamentWebApplicationFactory : WebApplicationFactory<Program>
         _connection.Open();
         builder.ConfigureTestServices(services =>
         {
-            services.RemoveAll<ITeamRepository>();
-            services.AddSingleton<ITeamRepository, TeamRepository>();
             services.RemoveAll<TournamentDbContext>();
             services.RemoveAll<DbContextOptions<TournamentDbContext>>();
             services.RemoveAll<IDbContextOptionsConfiguration<TournamentDbContext>>();

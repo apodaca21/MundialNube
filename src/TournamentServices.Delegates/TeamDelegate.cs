@@ -7,10 +7,14 @@ namespace TournamentServices.Delegates;
 public class TeamDelegate : ITeamDelegate
 {
     private readonly ITeamRepository _repo;
+    private readonly IGroupRepository _groups;
+    private readonly IMatchRepository _matches;
 
-    public TeamDelegate(ITeamRepository repo)
+    public TeamDelegate(ITeamRepository repo, IGroupRepository groups, IMatchRepository matches)
     {
         _repo = repo;
+        _groups = groups;
+        _matches = matches;
     }
 
     public Task<IReadOnlyList<Team>> GetAllAsync(CancellationToken cancellationToken = default)
@@ -51,6 +55,12 @@ public class TeamDelegate : ITeamDelegate
         var team = await _repo.GetByIdAsync(id, cancellationToken);
         if (team == null)
             throw new TeamNotFoundException(id);
+
+        if (await _groups.FindByTeamIdAsync(id, cancellationToken) is not null)
+            throw new TeamInUseException(id);
+
+        if ((await _matches.GetByTeamIdAsync(id, cancellationToken)).Count > 0)
+            throw new TeamInUseException(id);
 
         await _repo.DeleteAsync(id, cancellationToken);
     }

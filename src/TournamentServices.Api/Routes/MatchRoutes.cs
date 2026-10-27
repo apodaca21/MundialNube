@@ -30,7 +30,8 @@ public static class MatchRoutes
         try
         {
             var result = await matches.GetByTournamentAsync(tournamentId, cancellationToken);
-            return TypedResults.Ok(await Task.WhenAll(result.Select(match => ToDto(match, teams, cancellationToken))));
+            var lookup = await TeamLookup(teams, cancellationToken);
+            return TypedResults.Ok(result.Select(match => ToDto(match, lookup)).ToList());
         }
         catch (TournamentNotFoundException)
         {
@@ -49,7 +50,7 @@ public static class MatchRoutes
         var result = await matches.GetByIdAsync(tournamentId, matchId, cancellationToken);
         return result is null
             ? TypedResults.NotFound()
-            : TypedResults.Ok(await ToDto(result, teams, cancellationToken));
+            : TypedResults.Ok(ToDto(result, await TeamLookup(teams, cancellationToken)));
     }
 
     private static async Task<IResult> Create(string tournamentId, CreateMatchDto dto, IMatchDelegate matches,
@@ -137,16 +138,23 @@ public static class MatchRoutes
     private static MatchDto ToDto(DomainMatch match)
         => new(match.Id, match.TournamentId, match.GroupId, match.HomeTeamId, match.VisitorTeamId,
             null, null, new ScoreDto(match.Score.HomeTeamScore, match.Score.VisitorTeamScore),
-            match.Winner, match.IsCompleted);
+            match.Winner, match.IsCompleted, match.Stage);
 
-    private static async Task<MatchDto> ToDto(DomainMatch match, ITeamDelegate teams, CancellationToken cancellationToken)
+    private static async Task<Dictionary<string, Team>> TeamLookup(ITeamDelegate teams, CancellationToken cancellationToken)
     {
-        var home = await teams.GetByIdAsync(match.HomeTeamId, cancellationToken);
-        var visitor = await teams.GetByIdAsync(match.VisitorTeamId, cancellationToken);
+        var all = await teams.GetAllAsync(cancellationToken);
+        return all.ToDictionary(team => team.Id);
+    }
+
+    private static MatchDto ToDto(DomainMatch match, IReadOnlyDictionary<string, Team> teams)
+    {
+        teams.TryGetValue(match.HomeTeamId, out var home);
+        teams.TryGetValue(match.VisitorTeamId, out var visitor);
         return new MatchDto(match.Id, match.TournamentId, match.GroupId, match.HomeTeamId, match.VisitorTeamId,
             home is null ? null : new TeamDto(home.Id, home.Name),
             visitor is null ? null : new TeamDto(visitor.Id, visitor.Name),
-            new ScoreDto(match.Score.HomeTeamScore, match.Score.VisitorTeamScore), match.Winner, match.IsCompleted);
+            new ScoreDto(match.Score.HomeTeamScore, match.Score.VisitorTeamScore), match.Winner, match.IsCompleted,
+            match.Stage);
     }
 
     private static bool IsValidId(string id) => Regex.IsMatch(id, Team.IdPattern);

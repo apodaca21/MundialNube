@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mundial - Panel de pruebas</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 16px; background: #f4f4f4; color: #222; }
+    h1 { font-size: 20px; margin: 0 0 12px; }
+    nav { margin-bottom: 12px; }
+    nav button, .card button { padding: 6px 10px; margin-right: 4px; margin-bottom: 4px; }
+    nav button.active { font-weight: bold; }
+    .layout { display: flex; gap: 16px; align-items: flex-start; }
+    .col { flex: 1; }
+    .card { background: #fff; border: 1px solid #ccc; padding: 12px; margin-bottom: 12px; }
+    .card h2 { font-size: 16px; margin: 0 0 8px; }
+    label { display: block; font-size: 13px; margin: 8px 0 4px; }
+    input, select, textarea { width: 100%; box-sizing: border-box; padding: 6px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { border: 1px solid #ddd; padding: 6px; text-align: left; }
+    th { background: #eee; }
+    #log { white-space: pre-wrap; font-family: Consolas, monospace; font-size: 12px; background: #111; color: #d6d6d6; padding: 10px; min-height: 180px; }
+    .hidden { display: none; }
+    .row { display: flex; gap: 8px; }
+    .row > * { flex: 1; }
+    .group-list { display: flex; flex-wrap: wrap; gap: 8px; }
+    .group-btn { min-width: 140px; text-align: left; padding: 8px; }
+    .group-btn.selected { outline: 2px solid #222; font-weight: bold; }
+    .checks { display: flex; flex-wrap: wrap; gap: 8px 16px; margin: 8px 0; }
+    .checks label { display: flex; align-items: center; gap: 6px; margin: 0; }
+    .checks input { width: auto; }
+    .champ { background: #222; color: #fff; padding: 10px; margin-bottom: 12px; }
+    .champ p { margin: 4px 0; }
+    .standings { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .bracket h3 { margin: 12px 0 6px; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <h1>Mundial - panel de pruebas</h1>
+  <nav>
+    <button class="tab active" data-tab="equipos">Equipos</button>
+    <button class="tab" data-tab="torneos">Torneos</button>
+    <button class="tab" data-tab="grupos">Grupos</button>
+    <button class="tab" data-tab="partidos">Partidos</button>
+    <button class="tab" data-tab="simulacion">Simulacion</button>
+  </nav>
+
+  <div class="layout">
+    <div class="col">
+      <section id="equipos" class="panel">
+        <div class="card">
+          <h2>Crear equipo</h2>
+          <label>Nombre</label>
+          <input id="teamName" placeholder="Mexico">
+          <button onclick="createTeam()">Crear equipo</button>
+          <button onclick="loadTeams()">Listar equipos</button>
+        </div>
+        <div class="card">
+          <h2>Equipos</h2>
+          <div id="teamsTable"></div>
+        </div>
+      </section>
+
+      <section id="torneos" class="panel hidden">
+        <div class="card">
+          <h2>Crear torneo</h2>
+          <label>Nombre</label>
+          <input id="tournamentName" placeholder="Mundial 2026">
+          <p>Formato fijo: Mundial FIFA. 8 grupos de 4, todos contra todos y luego octavos, cuartos, semis, tercer puesto y final.</p>
+          <button onclick="createTournament()">Crear torneo</button>
+          <button onclick="loadTournaments()">Listar torneos</button>
+        </div>
+        <div class="card">
+          <h2>Autosimular todo el torneo</h2>
+          <p>Arma grupos, partidos, marcadores y el bracket completo de un solo clic.</p>
+          <label>Torneo</label>
+          <select id="autoTournament" onchange="onTournamentChange()"></select>
+          <button onclick="autosimulateCurrent()">Autosimular este torneo</button>
+          <button onclick="createAndSimulate()">Crear torneo y autosimular</button>
+        </div>
+        <div class="card">
+          <h2>Torneos</h2>
+          <div id="tournamentsTable"></div>
+        </div>
+      </section>
+
+      <section id="grupos" class="panel hidden">
+        <div class="card">
+          <h2>1. Elige el torneo</h2>
+          <select id="groupTournament" onchange="onTournamentChange()"></select>
+        </div>
+        <div class="card">
+          <h2>2. Agregar grupo al torneo</h2>
+          <label>Nombre</label>
+          <input id="groupName" placeholder="Grupo A">
+          <button onclick="createGroup()">Agregar grupo</button>
+          <div style="margin-top:8px">
+            <button type="button" onclick="quickGroup('Grupo A')">Grupo A</button>
+            <button type="button" onclick="quickGroup('Grupo B')">Grupo B</button>
+            <button type="button" onclick="quickGroup('Grupo C')">Grupo C</button>
+            <button type="button" onclick="quickGroup('Grupo D')">Grupo D</button>
+          </div>
+        </div>
+        <div class="card">
+          <h2>3. Selecciona un grupo</h2>
+          <p id="selectedGroupLabel">Todavia no hay un grupo seleccionado.</p>
+          <div id="groupList" class="group-list"></div>
+        </div>
+        <div class="card">
+          <h2>4. Marca equipos y guardalos en el grupo</h2>
+          <div id="teamChecks" class="checks"></div>
+          <button onclick="assignTeams()">Guardar equipos en el grupo</button>
+        </div>
+        <div class="card">
+          <h2>Autosimular todo el torneo</h2>
+          <p>Completa los 8 grupos, genera todos los partidos y corre el mundial hasta la final.</p>
+          <button onclick="autosimulateCurrent()">Autosimular este torneo</button>
+        </div>
+      </section>
+
+      <section id="partidos" class="panel hidden">
+        <div class="card">
+          <h2>Crear partido</h2>
+          <label>Torneo</label>
+          <select id="matchTournament" onchange="onTournamentChange()"></select>
+          <label>Grupo</label>
+          <select id="matchGroup" onchange="filterMatchTeams()"></select>
+          <div class="row">
+            <div>
+              <label>Local</label>
+              <select id="homeTeam"></select>
+            </div>
+            <div>
+              <label>Visitante</label>
+              <select id="visitorTeam"></select>
+            </div>
+          </div>
+          <button onclick="createMatch()">Crear partido</button>
+          <button onclick="loadMatches()">Listar partidos</button>
+          <button onclick="autosimulateCurrent()">Autosimular todo el torneo</button>
+        </div>
+        <div class="card">
+          <h2>Cargar resultado</h2>
+          <label>Partido</label>
+          <select id="scoreMatch"></select>
+          <div class="row">
+            <div>
+              <label>Goles local</label>
+              <input id="homeScore" type="number" value="0" min="0">
+            </div>
+            <div>
+              <label>Goles visitante</label>
+              <input id="visitorScore" type="number" value="0" min="0">
+            </div>
+          </div>
+          <button onclick="updateScore()">Guardar marcador</button>
+        </div>
+        <div class="card">
+          <h2>Partidos</h2>
+          <div id="matchesTable"></div>
+        </div>
+      </section>
+
+      <section id="simulacion" class="panel hidden">
+        <div class="card">
+          <h2>Carga automatica del Mundial</h2>
+          <p>Arma 8 grupos de 4, todos los partidos de fase de grupos, resultados simulados y el bracket hasta la final.</p>
+          <label>Torneo</label>
+          <select id="simTournament"></select>
+          <button onclick="simulateMundial()">Autosimular Mundial completo</button>
+          <button onclick="createAndSimulate()">Crear torneo y autosimular</button>
+        </div>
+        <div class="card">
+          <h2>Resultado</h2>
+          <div id="mundialResult">Todavia no hay simulacion.</div>
+        </div>
+      </section>
+    </div>
+
+    <div class="col">
+      <div class="card">
+        <h2>Respuesta del API</h2>
+        <div id="log">Listo. Usa los botones de la izquierda.</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const api = "";
+    let selectedGroupId = "";
+    let cachedTeams = [];
+    let cachedGroups = [];
+
+    document.querySelectorAll(".tab").forEach(button => {
+      button.onclick = () => showTab(button.dataset.tab);
+    });
+
+    function showTab(tab) {
+      document.querySelectorAll(".tab").forEach(item => item.classList.toggle("active", item.dataset.tab === tab));
+      document.querySelectorAll(".panel").forEach(item => item.classList.toggle("hidden", item.id !== tab));
+    }
+
+    async function request(method, path, body) {
+      const options = { method, headers: { "Content-Type": "application/json" } };
+      if (body !== undefined) options.body = JSON.stringify(body);
+      const response = await fetch(api + path, options);
+      const text = await response.text();
+      let data = text;
+      try { data = text ? JSON.parse(text) : ""; } catch { }
+      document.getElementById("log").textContent =
+        method + " " + path + "\nHTTP " + response.status + "\n" + JSON.stringify(data, null, 2);
+      if (!response.ok) throw new Error("HTTP " + response.status);
+      return data;
+    }
+
+    function option(select, value, label) {
+      const item = document.createElement("option");
+      item.value = value;
+      item.textContent = label;
+      select.appendChild(item);
+    }
+
+    function fillSelect(select, items, labelFn) {
+      const current = select.value;
+      select.innerHTML = "";
+      items.forEach(item => option(select, item.id, labelFn(item)));
+      if ([...select.options].some(item => item.value === current)) select.value = current;
+    }
+
+    function table(target, headers, rows) {
+      if (!rows.length) {
+        target.innerHTML = "<p>No hay datos.</p>";
+        return;
+      }
+      let html = "<table><tr>" + headers.map(h => "<th>" + h + "</th>").join("") + "</tr>";
+      rows.forEach(row => {
+        html += "<tr>" + row.map(cell => "<td>" + cell + "</td>").join("") + "</tr>";
+      });
+      target.innerHTML = html + "</table>";
+    }
+
+    function tournamentSelects() {
+      return ["groupTournament", "matchTournament", "simTournament", "autoTournament"]
+        .map(id => document.getElementById(id))
+        .filter(Boolean);
+    }
+
+    function currentTournament() {
+      return tournamentSelects().map(select => select.value).find(value => value) || "";
+    }
+
+    function setCurrentTournament(value) {
+      tournamentSelects().forEach(select => { select.value = value; });
+    }
+
+    function onTournamentChange() {
+      const value = event.target.value;
+      setCurrentTournament(value);
+      selectedGroupId = "";
+      loadGroups();
+    }
+
+    function renderTeamChecks() {
+      const box = document.getElementById("teamChecks");
+      const group = cachedGroups.find(item => item.id === selectedGroupId);
+      const assigned = new Set((group && group.teams || []).map(team => team.id));
+      box.innerHTML = "";
+      cachedTeams.forEach(team => {
+        const label = document.createElement("label");
+        const check = document.createElement("input");
+        check.type = "checkbox";
+        check.value = team.id;
+        check.checked = assigned.has(team.id);
+        label.appendChild(check);
+        label.appendChild(document.createTextNode(team.name));
+        box.appendChild(label);
+      });
+    }
+
+    function selectGroup(groupId) {
+      selectedGroupId = groupId;
+      const group = cachedGroups.find(item => item.id === groupId);
+      document.getElementById("selectedGroupLabel").textContent = group
+        ? "Grupo seleccionado: " + group.name
+        : "Todavia no hay un grupo seleccionado.";
+      document.getElementById("matchGroup").value = groupId;
+      document.querySelectorAll(".group-btn").forEach(btn => {
+        btn.classList.toggle("selected", btn.dataset.id === groupId);
+      });
+      renderTeamChecks();
+      filterMatchTeams();
+    }
+
+    function renderGroups() {
+      const list = document.getElementById("groupList");
+      list.innerHTML = "";
+      if (!cachedGroups.length) {
+        list.innerHTML = "<p>Este torneo no tiene grupos. Agrega uno arriba.</p>";
+        return;
+      }
+      cachedGroups.forEach(group => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "group-btn" + (group.id === selectedGroupId ? " selected" : "");
+        button.dataset.id = group.id;
+        const names = (group.teams || []).map(team => team.name).join(", ") || "sin equipos";
+        button.textContent = group.name + " - " + names;
+        button.onclick = () => selectGroup(group.id);
+        list.appendChild(button);
+      });
+      fillSelect(document.getElementById("matchGroup"), cachedGroups, group => group.name);
+      if (selectedGroupId) {
+        document.getElementById("matchGroup").value = selectedGroupId;
+        selectGroup(selectedGroupId);
+      }
+      filterMatchTeams();
+    }
+
+    function teamsForMatch() {
+      const groupId = document.getElementById("matchGroup").value;
+      const group = cachedGroups.find(item => item.id === groupId);
+      if (group && group.teams && group.teams.length)
+        return group.teams;
+      return [];
+    }
+
+    function filterMatchTeams() {
+      const teams = teamsForMatch();
+      fillSelect(document.getElementById("homeTeam"), teams, team => team.name);
+      fillSelect(document.getElementById("visitorTeam"), teams, team => team.name);
+      if (teams.length >= 2)
+        document.getElementById("visitorTeam").selectedIndex = 1;
+    }
+
+    async function loadTeams() {
+      cachedTeams = await request("GET", "/teams");
+      table(document.getElementById("teamsTable"), ["Id", "Nombre"],
+        cachedTeams.map(team => [team.id, team.name]));
+      filterMatchTeams();
+      renderTeamChecks();
+      return cachedTeams;
+    }
+
+    async function createTeam() {
+      await request("POST", "/teams", { name: document.getElementById("teamName").value });
+      document.getElementById("teamName").value = "";
+      await loadTeams();
+    }
+
+    async function loadTournaments() {
+      const tournaments = await request("GET", "/tournaments");
+      table(document.getElementById("tournamentsTable"), ["Id", "Nombre", "Formato", "Acciones"],
+        tournaments.map(item => [
+          item.id,
+          item.name,
+          formatLabel(item.format && item.format.type),
+          "<button type='button' onclick=\"autosimulateTournament('" + item.id + "')\">Autosimular</button>"
+        ]));
+      tournamentSelects().forEach(select => fillSelect(select, tournaments, t => t.name));
+      if (tournaments.length) await loadGroups();
+      return tournaments;
+    }
+
+    async function createTournament() {
+      await request("POST", "/tournaments", {
+        name: document.getElementById("tournamentName").value,
+        format: { type: "FIFA", maxGroups: 8, maxTeamsPerGroup: 4 }
+      });
+      await loadTournaments();
+    }
+
+    async function loadGroups() {
+      const tournamentId = currentTournament();
+      if (!tournamentId) return [];
+      cachedGroups = await request("GET", "/tournaments/" + tournamentId + "/groups");
+      renderGroups();
+      return cachedGroups;
+    }
+
+    async function createGroup() {
+      const tournamentId = currentTournament();
+      const name = document.getElementById("groupName").value.trim();
+      if (!tournamentId || !name) return;
+      const created = await request("POST", "/tournaments/" + tournamentId + "/groups", { name });
+      document.getElementById("groupName").value = "";
+      await loadGroups();
+      if (created && created.id) selectGroup(created.id);
+    }
+
+    function quickGroup(name) {
+      document.getElementById("groupName").value = name;
+      createGroup();
+    }
+
+    async function assignTeams() {
+      const tournamentId = currentTournament();
+      if (!tournamentId || !selectedGroupId) {
+        document.getElementById("log").textContent = "Primero selecciona un grupo.";
+        return;
+      }
+      const teamIds = [...document.querySelectorAll("#teamChecks input:checked")].map(item => item.value);
+      await request("PATCH", "/tournaments/" + tournamentId + "/groups/" + selectedGroupId + "/teams", { teamIds });
+      await loadGroups();
+    }
+
+    async function loadMatches() {
+      const tournamentId = currentTournament();
+      if (!tournamentId) return [];
+      const matches = await request("GET", "/tournaments/" + tournamentId + "/matches");
+      table(document.getElementById("matchesTable"), ["Fase", "Local", "Visitante", "Marcador", "Ganador"],
+        matches.map(match => [
+          stageLabel(match.stage),
+          match.homeTeam ? match.homeTeam.name : match.homeTeamId,
+          match.visitorTeam ? match.visitorTeam.name : match.visitorTeamId,
+          match.score.homeTeamScore + " - " + match.score.visitorTeamScore,
+          match.winner || "-"
+        ]));
+      fillSelect(document.getElementById("scoreMatch"), matches, match => {
+        const home = match.homeTeam ? match.homeTeam.name : match.homeTeamId;
+        const visitor = match.visitorTeam ? match.visitorTeam.name : match.visitorTeamId;
+        return home + " vs " + visitor;
+      });
+      return matches;
+    }
+
+    async function createMatch() {
+      const tournamentId = currentTournament();
+      await request("POST", "/tournaments/" + tournamentId + "/matches", {
+        groupId: document.getElementById("matchGroup").value || null,
+        homeTeamId: document.getElementById("homeTeam").value,
+        visitorTeamId: document.getElementById("visitorTeam").value
+      });
+      await loadMatches();
+    }
+
+    function formatLabel(type) {
+      return type === "FIFA" ? "Mundial FIFA" : (type || "Mundial FIFA");
+    }
+
+    function stageLabel(stage) {
+      return {
+        GROUP: "Grupos",
+        ROUND_OF_16: "Octavos",
+        QUARTERFINAL: "Cuartos",
+        SEMIFINAL: "Semifinal",
+        THIRD_PLACE: "Tercer puesto",
+        FINAL: "Final"
+      }[stage] || stage || "Grupos";
+    }
+
+    function renderMundial(data) {
+      const box = document.getElementById("mundialResult");
+      let html = "<div class='champ'><p><b>Campeon:</b> " + data.championName + "</p>";
+      html += "<p>Subcampeon: " + data.runnerUpName + "</p>";
+      html += "<p>Tercer lugar: " + data.thirdPlaceName + "</p></div>";
+
+      const groups = {};
+      (data.standings || []).forEach(row => {
+        groups[row.groupName] = groups[row.groupName] || [];
+        groups[row.groupName].push(row);
+      });
+      html += "<div class='standings'>";
+      Object.keys(groups).sort().forEach(name => {
+        html += "<div><h3>" + name + "</h3><table><tr><th>#</th><th>Equipo</th><th>Pts</th><th>PJ</th><th>DG</th></tr>";
+        groups[name].sort((a, b) => a.rank - b.rank).forEach(row => {
+          html += "<tr><td>" + row.rank + "</td><td>" + row.teamName + "</td><td>" + row.points +
+            "</td><td>" + row.played + "</td><td>" + row.goalDifference + "</td></tr>";
+        });
+        html += "</table></div>";
+      });
+      html += "</div><div class='bracket'>";
+      ["ROUND_OF_16", "QUARTERFINAL", "SEMIFINAL", "THIRD_PLACE", "FINAL"].forEach(stage => {
+        const rows = (data.matches || []).filter(match => match.stage === stage);
+        if (!rows.length) return;
+        html += "<h3>" + stageLabel(stage) + "</h3><table><tr><th>Local</th><th>Visitante</th><th>Marcador</th><th>Gana</th></tr>";
+        rows.forEach(match => {
+          html += "<tr><td>" + match.homeTeamName + "</td><td>" + match.visitorTeamName + "</td><td>" +
+            match.score.homeTeamScore + " - " + match.score.visitorTeamScore + "</td><td>" +
+            (match.winnerTeamName || "-") + "</td></tr>";
+        });
+        html += "</table>";
+      });
+      html += "</div>";
+      box.innerHTML = html;
+    }
+
+    async function autosimulateCurrent() {
+      await autosimulateTournament(currentTournament());
+    }
+
+    async function autosimulateTournament(tournamentId) {
+      if (!tournamentId) {
+        document.getElementById("log").textContent = "Crea o selecciona un torneo primero.";
+        return;
+      }
+      setCurrentTournament(tournamentId);
+      showTab("simulacion");
+      const data = await request("POST", "/tournaments/" + tournamentId + "/mundial");
+      renderMundial(data);
+      await loadTournaments();
+      await loadTeams();
+      await loadMatches();
+      setCurrentTournament(tournamentId);
+    }
+
+    async function simulateMundial() {
+      await autosimulateTournament(document.getElementById("simTournament").value || currentTournament());
+    }
+
+    async function createAndSimulate() {
+      const created = await request("POST", "/tournaments", {
+        name: "Mundial simulado " + Date.now(),
+        format: { type: "FIFA", maxGroups: 8, maxTeamsPerGroup: 4 }
+      });
+      await loadTournaments();
+      setCurrentTournament(created.id);
+      await autosimulateTournament(created.id);
+    }
+
+    async function updateScore() {
+      const tournamentId = currentTournament();
+      const matchId = document.getElementById("scoreMatch").value;
+      await request("PATCH", "/tournaments/" + tournamentId + "/matches/" + matchId + "/score", {
+        homeTeamScore: Number(document.getElementById("homeScore").value),
+        visitorTeamScore: Number(document.getElementById("visitorScore").value)
+      });
+      await loadMatches();
+    }
+
+    loadTeams().then(loadTournaments).catch(() => {});
+  </script>
+</body>
+</html>

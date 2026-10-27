@@ -1,58 +1,62 @@
-using System.Collections.Concurrent;
+using Microsoft.EntityFrameworkCore;
 using TournamentServices.Domain;
 
 namespace TournamentServices.Repositories;
 
-public class GroupRepository : IGroupRepository
+public class GroupRepository(TournamentDbContext db) : IGroupRepository
 {
-    private readonly ConcurrentDictionary<string, Group> _groups = new();
-
-    public Task<IReadOnlyList<Group>> GetByTournamentIdAsync(string tournamentId, CancellationToken cancellationToken = default)
-        => Task.FromResult<IReadOnlyList<Group>>(_groups.Values
+    public async Task<IReadOnlyList<Group>> GetByTournamentIdAsync(string tournamentId, CancellationToken cancellationToken = default)
+    {
+        return await db.Groups.AsNoTracking()
             .Where(group => group.TournamentId == tournamentId)
             .OrderBy(group => group.Id)
-            .Select(Copy)
-            .ToList());
+            .ToListAsync(cancellationToken);
+    }
 
     public Task<Group?> GetByIdAsync(string tournamentId, string groupId, CancellationToken cancellationToken = default)
-        => Task.FromResult(_groups.TryGetValue(groupId, out var group) && group.TournamentId == tournamentId
-            ? Copy(group)
-            : null);
+    {
+        return db.Groups.AsNoTracking()
+            .FirstOrDefaultAsync(group => group.Id == groupId && group.TournamentId == tournamentId, cancellationToken);
+    }
 
     public Task<Group?> GetByNameAsync(string tournamentId, string name, CancellationToken cancellationToken = default)
-        => Task.FromResult(_groups.Values.FirstOrDefault(group =>
-            group.TournamentId == tournamentId &&
-            group.Name.Equals(name, StringComparison.OrdinalIgnoreCase)) is { } group
-                ? Copy(group)
-                : null);
-
-    public Task AddAsync(Group group, CancellationToken cancellationToken = default)
     {
-        if (!_groups.TryAdd(group.Id, Copy(group)))
-            throw new InvalidOperationException($"A group with id '{group.Id}' already exists.");
-
-        return Task.CompletedTask;
+        var normalized = name.ToLower();
+        return db.Groups.AsNoTracking()
+            .FirstOrDefaultAsync(group =>
+                group.TournamentId == tournamentId &&
+                group.Name.ToLower() == normalized, cancellationToken);
     }
 
-    public Task UpdateAsync(Group group, CancellationToken cancellationToken = default)
+    public async Task<Group?> FindByTeamIdAsync(string teamId, CancellationToken cancellationToken = default)
     {
-        if (!_groups.ContainsKey(group.Id))
-            throw new KeyNotFoundException($"Group '{group.Id}' was not found.");
-
-        _groups[group.Id] = Copy(group);
-        return Task.CompletedTask;
+        var groups = await db.Groups.AsNoTracking().ToListAsync(cancellationToken);
+        return groups.FirstOrDefault(group => group.TeamIds.Contains(teamId));
     }
 
-    public Task DeleteAsync(string groupId, CancellationToken cancellationToken = default)
+    public async Task AddAsync(Group group, CancellationToken cancellationToken = default)
     {
-        _groups.TryRemove(groupId, out _);
-        return Task.CompletedTask;
+        db.Groups.Add(group);
+        await db.SaveChangesAsync(cancellationToken);
     }
 
-    private static Group Copy(Group group)
+    public async Task UpdateAsync(Group group, CancellationToken cancellationToken = default)
     {
-        var copy = new Group(group.Id, group.Name, group.TournamentId);
-        copy.AssignTeams(group.TeamIds);
-        return copy;
+        var stored = await db.Groups.FindAsync([group.Id], cancellationToken)
+            ?? throw new KeyNotFoundException($"Group '{group.Id}' was not found.");
+
+        stored.Rename(group.Name);
+        stored.AssignTeams(group.TeamIds.ToList());
+        await db.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task DeleteAsync(string groupId, CancellationToken cancellationToken = default)
+    {
+        var stored = await db.Groups.FindAsync([groupId], cancellationToken);
+        if (stored is null)
+            return;
+
+        db.Groups.Remove(stored);
+        await db.SaveChangesAsync(cancellationToken);
     }
 }

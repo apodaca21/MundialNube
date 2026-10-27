@@ -11,17 +11,39 @@ public class TournamentTests
 
         Assert.True(Guid.TryParse(tournament.Id, out _));
         Assert.Matches(Tournament.IdPattern, tournament.Id);
-        Assert.Equal(new TournamentFormat(TournamentFormat.RoundRobin, 8, 4), tournament.Format);
+        Assert.Equal(new TournamentFormat(TournamentFormat.Fifa, 8, 4), tournament.Format);
+    }
+
+    [Fact]
+    public void TournamentBuilder_BuildsTournamentWithChildren()
+    {
+        var tournament = new TournamentBuilder()
+            .WithId("cup-1")
+            .WithName("Mundial 2026")
+            .WithFormat(new TournamentFormat(TournamentFormat.Fifa, 8, 4))
+            .WithGroup(new Group("group-1", "Group A", "cup-1"))
+            .Build();
+
+        Assert.Equal("cup-1", tournament.Id);
+        Assert.Equal("Mundial 2026", tournament.Name);
+        Assert.Single(tournament.Groups);
+    }
+
+    [Fact]
+    public void TournamentFormat_AcceptsFifa()
+    {
+        var format = new TournamentFormat(TournamentFormat.Fifa, 8, 4);
+
+        Assert.Equal("FIFA", format.Type);
     }
 
     [Theory]
     [InlineData(8, 4)]
-
     public void TournamentFormat_AcceptsValidLimits(int maxGroups, int maxTeamsPerGroup)
     {
-        var format = new TournamentFormat(TournamentFormat.RoundRobin, maxGroups, maxTeamsPerGroup);
+        var format = new TournamentFormat(TournamentFormat.Fifa, maxGroups, maxTeamsPerGroup);
 
-        Assert.Equal("ROUND_ROBIN", format.Type);
+        Assert.Equal("FIFA", format.Type);
         Assert.Equal(maxGroups, format.MaxGroups);
         Assert.Equal(maxTeamsPerGroup, format.MaxTeamsPerGroup);
     }
@@ -29,8 +51,8 @@ public class TournamentTests
     [Fact]
     public void TournamentFormat_UsesValueEquality()
     {
-        var first = new TournamentFormat(TournamentFormat.RoundRobin, 8, 4);
-        var equivalent = new TournamentFormat(TournamentFormat.RoundRobin, 8, 4);
+        var first = new TournamentFormat(TournamentFormat.Fifa, 8, 4);
+        var equivalent = new TournamentFormat(TournamentFormat.Fifa, 8, 4);
 
         Assert.Equal(first, equivalent);
         Assert.Equal(first.GetHashCode(), equivalent.GetHashCode());
@@ -40,6 +62,8 @@ public class TournamentTests
 
     [Theory]
     [InlineData("KNOCKOUT")]
+    [InlineData("ROUND_ROBIN")]
+    [InlineData("NFL")]
     [InlineData("round_robin")]
     [InlineData("")]
     [InlineData(null)]
@@ -56,7 +80,7 @@ public class TournamentTests
     public void TournamentFormat_RejectsInvalidGroupLimits(int maxGroups)
     {
         var exception = Assert.Throws<ArgumentOutOfRangeException>(
-            () => new TournamentFormat(TournamentFormat.RoundRobin, maxGroups, 4));
+            () => new TournamentFormat(TournamentFormat.Fifa, maxGroups, 4));
 
         Assert.Equal("maxGroups", exception.ParamName);
     }
@@ -67,7 +91,7 @@ public class TournamentTests
     public void TournamentFormat_RejectsInvalidTeamLimits(int maxTeamsPerGroup)
     {
         var exception = Assert.Throws<ArgumentOutOfRangeException>(
-            () => new TournamentFormat(TournamentFormat.RoundRobin, 8, maxTeamsPerGroup));
+            () => new TournamentFormat(TournamentFormat.Fifa, 8, maxTeamsPerGroup));
 
         Assert.Equal("maxTeamsPerGroup", exception.ParamName);
     }
