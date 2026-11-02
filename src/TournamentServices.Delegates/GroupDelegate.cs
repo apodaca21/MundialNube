@@ -40,6 +40,9 @@ public class GroupDelegate(
         var group = await groupRepository.GetByIdAsync(tournamentId, groupId, cancellationToken)
             ?? throw new GroupNotFoundException(groupId);
 
+        if ((await matchRepository.GetByGroupIdAsync(groupId, cancellationToken)).Count > 0)
+            throw new GroupRuleViolationException("Cannot rename a group after matches have been created.");
+
         var existing = await groupRepository.GetByNameAsync(tournamentId, name, cancellationToken);
         if (existing is not null && existing.Id != groupId)
             throw new DuplicateGroupNameException(name);
@@ -55,6 +58,16 @@ public class GroupDelegate(
         var tournament = await EnsureTournamentExists(tournamentId, cancellationToken);
         var group = await groupRepository.GetByIdAsync(tournamentId, groupId, cancellationToken)
             ?? throw new GroupNotFoundException(groupId);
+
+        var matches = await matchRepository.GetByGroupIdAsync(groupId, cancellationToken);
+        if (matches.Count > 0)
+        {
+            var current = group.TeamIds.ToHashSet(StringComparer.Ordinal);
+            var next = teamIds.ToHashSet(StringComparer.Ordinal);
+            if (!current.SetEquals(next))
+                throw new GroupRuleViolationException("Cannot change group teams after matches have been created.");
+            return;
+        }
 
         if (teamIds.Distinct(StringComparer.Ordinal).Count() != teamIds.Count)
             throw new GroupRuleViolationException("A team cannot be assigned more than once to a group.");
@@ -81,6 +94,9 @@ public class GroupDelegate(
         await EnsureTournamentExists(tournamentId, cancellationToken);
         if (await groupRepository.GetByIdAsync(tournamentId, groupId, cancellationToken) is null)
             throw new GroupNotFoundException(groupId);
+
+        if ((await matchRepository.GetByTournamentAndStageAsync(tournamentId, MatchStages.RoundOf16, cancellationToken)).Count > 0)
+            throw new GroupRuleViolationException("Cannot delete a group after the knockout stage has started.");
 
         var matches = await matchRepository.GetByGroupIdAsync(groupId, cancellationToken);
         foreach (var match in matches)

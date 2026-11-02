@@ -88,13 +88,24 @@ public class MatchRoutesTests : TournamentApiTests
     }
 
     [Fact]
-    public async Task CreateMatch_Returns422_WhenTeamsAreTheSame()
+    public async Task CreateMatch_Returns400_WhenGroupIdIsMissing()
     {
         var tournament = await CreateTournament("World Cup");
         var team = await CreateTeam("Mexico");
 
         var response = await Client.PostAsJsonAsync($"/tournaments/{tournament.Id}/matches",
             new CreateMatchDto(null, team.Id, team.Id));
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task CreateMatch_Returns422_WhenTeamsAreTheSame()
+    {
+        var (tournament, group, home, _) = await SeedGroupWithTeams();
+
+        var response = await Client.PostAsJsonAsync($"/tournaments/{tournament.Id}/matches",
+            new CreateMatchDto(group.Id, home.Id, home.Id));
 
         Assert.Equal(HttpStatusCode.UnprocessableEntity, response.StatusCode);
     }
@@ -112,16 +123,13 @@ public class MatchRoutesTests : TournamentApiTests
     }
 
     [Fact]
-    public async Task CreateMatch_Returns422_WhenTeamIsNotInTournament()
+    public async Task Post_Mundial_Returns404_BecauseSimulationWasRemoved()
     {
         var tournament = await CreateTournament("World Cup");
-        var home = await CreateTeam("Mexico");
-        var visitor = await CreateTeam("Argentina");
 
-        var response = await Client.PostAsJsonAsync($"/tournaments/{tournament.Id}/matches",
-            new CreateMatchDto(null, home.Id, visitor.Id));
+        var response = await Client.PostAsync($"/tournaments/{tournament.Id}/mundial", null);
 
-        Assert.Equal(HttpStatusCode.UnprocessableEntity, response.StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 
     [Fact]
@@ -227,6 +235,74 @@ public class MatchRoutesTests : TournamentApiTests
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
+    [Fact]
+    public async Task GroupStage_AdvancesAutomatically_ThroughTheFinal()
+    {
+        var tournament = await CreateTournament("Automatic World Cup");
+        for (var groupIndex = 0; groupIndex < 8; groupIndex++)
+        {
+            var group = await CreateGroup(tournament.Id, $"Group {(char)('A' + groupIndex)}");
+            var teams = new List<TeamDto>();
+            for (var teamIndex = 0; teamIndex < 4; teamIndex++)
+                teams.Add(await CreateTeam($"Team-{groupIndex}-{teamIndex}"));
+            await AssignTeams(tournament.Id, group.Id, teams.Select(team => team.Id).ToList());
+        }
+
+        var generateResponse = await Client.PostAsync(
+            $"/tournaments/{tournament.Id}/matches/group-stage", null);
+        var groupMatches = await ReadList<MatchDto>(generateResponse);
+
+        Assert.Equal(HttpStatusCode.OK, generateResponse.StatusCode);
+        Assert.Equal(48, groupMatches.Count);
+        Assert.All(groupMatches, match => Assert.Equal("GROUP", match.Stage));
+
+        var retryResponse = await Client.PostAsync(
+            $"/tournaments/{tournament.Id}/matches/group-stage", null);
+        Assert.Equal(48, (await ReadList<MatchDto>(retryResponse)).Count);
+
+        await ScoreStage(tournament.Id, "GROUP", 1, 0);
+        var matches = await GetMatches(tournament.Id);
+        Assert.Equal(8, matches.Count(match => match.Stage == "ROUND_OF_16"));
+        Assert.Equal(Enumerable.Range(1, 8).ToArray(),
+            matches.Where(match => match.Stage == "ROUND_OF_16")
+                .Select(match => match.RoundPosition!.Value).ToArray());
+
+        var closedGroupResponse = await Client.PatchAsJsonAsync(
+            $"/tournaments/{tournament.Id}/matches/{groupMatches[0].Id}/score",
+            new UpdateScoreDto(2, 0));
+        Assert.Equal(HttpStatusCode.UnprocessableEntity, closedGroupResponse.StatusCode);
+
+        var firstRoundOf16 = matches.First(match => match.Stage == "ROUND_OF_16");
+        var drawResponse = await Client.PatchAsJsonAsync(
+            $"/tournaments/{tournament.Id}/matches/{firstRoundOf16.Id}/score",
+            new UpdateScoreDto(1, 1));
+        Assert.Equal(HttpStatusCode.UnprocessableEntity, drawResponse.StatusCode);
+
+        await ScoreStage(tournament.Id, "ROUND_OF_16", 2, 1);
+        Assert.Equal(4, (await GetMatches(tournament.Id)).Count(match => match.Stage == "QUARTERFINAL"));
+
+        await ScoreStage(tournament.Id, "QUARTERFINAL", 2, 0);
+        Assert.Equal(2, (await GetMatches(tournament.Id)).Count(match => match.Stage == "SEMIFINAL"));
+
+        await ScoreStage(tournament.Id, "SEMIFINAL", 3, 1);
+        matches = await GetMatches(tournament.Id);
+        Assert.Single(matches, match => match.Stage == "THIRD_PLACE");
+        Assert.Single(matches, match => match.Stage == "FINAL");
+
+        await ScoreStage(tournament.Id, "THIRD_PLACE", 1, 0);
+        await ScoreStage(tournament.Id, "FINAL", 2, 1);
+
+        matches = await GetMatches(tournament.Id);
+        Assert.Equal(64, matches.Count);
+        Assert.All(matches, match => Assert.True(match.IsCompleted));
+
+        var standingsResponse = await Client.GetAsync($"/tournaments/{tournament.Id}/standings");
+        var standings = await ReadList<MundialStandingDto>(standingsResponse);
+        Assert.Equal(HttpStatusCode.OK, standingsResponse.StatusCode);
+        Assert.Equal(32, standings.Count);
+        Assert.All(standings, row => Assert.Equal(3, row.Played));
+    }
+
     private async Task<(TournamentDto Tournament, GroupDto Group, TeamDto Home, TeamDto Visitor)> SeedGroupWithTeams()
     {
         var tournament = await CreateTournament("World Cup");
@@ -276,6 +352,27 @@ public class MatchRoutesTests : TournamentApiTests
             new CreateMatchDto(groupId, homeTeamId, visitorTeamId));
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         return await Read<MatchDto>(response);
+    }
+
+    private async Task<List<MatchDto>> GetMatches(string tournamentId)
+    {
+        var response = await Client.GetAsync($"/tournaments/{tournamentId}/matches");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        return await ReadList<MatchDto>(response);
+    }
+
+    private async Task ScoreStage(string tournamentId, string stage, int homeScore, int visitorScore)
+    {
+        var stageMatches = (await GetMatches(tournamentId))
+            .Where(match => match.Stage == stage && !match.IsCompleted)
+            .ToList();
+        foreach (var match in stageMatches)
+        {
+            var response = await Client.PatchAsJsonAsync(
+                $"/tournaments/{tournamentId}/matches/{match.Id}/score",
+                new UpdateScoreDto(homeScore, visitorScore));
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        }
     }
 
     private static async Task<T> Read<T>(HttpResponseMessage response)

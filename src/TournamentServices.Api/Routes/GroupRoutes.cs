@@ -115,6 +115,10 @@ public static class GroupRoutes
         {
             return TypedResults.Problem(ex.Message, statusCode: StatusCodes.Status422UnprocessableEntity);
         }
+        catch (GroupRuleViolationException ex)
+        {
+            return TypedResults.Problem(ex.Message, statusCode: StatusCodes.Status422UnprocessableEntity);
+        }
     }
 
     private static async Task<IResult> AssignTeams(string tournamentId, string groupId, AssignTeamsDto dto,
@@ -176,6 +180,10 @@ public static class GroupRoutes
         catch (TournamentNotFoundException)
         {
             return TypedResults.NotFound();
+        }
+        catch (GroupRuleViolationException ex)
+        {
+            return TypedResults.Problem(ex.Message, statusCode: StatusCodes.Status422UnprocessableEntity);
         }
     }
 

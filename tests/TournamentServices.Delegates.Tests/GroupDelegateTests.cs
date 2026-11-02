@@ -15,6 +15,11 @@ public class GroupDelegateTests
 
     public GroupDelegateTests()
     {
+        _matches.Setup(r => r.GetByGroupIdAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Array.Empty<Domain.Match>());
+        _matches.Setup(r => r.GetByTournamentAndStageAsync(
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Array.Empty<Domain.Match>());
         _delegate = new GroupDelegate(_groups.Object, _matches.Object, _teams.Object, _tournaments.Object);
     }
 

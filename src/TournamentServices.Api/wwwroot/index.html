@@ -42,7 +42,7 @@
     <button class="tab" data-tab="torneos">Torneos</button>
     <button class="tab" data-tab="grupos">Grupos</button>
     <button class="tab" data-tab="partidos">Partidos</button>
-    <button class="tab" data-tab="simulacion">Simulacion</button>
+    <button class="tab" data-tab="clasificacion">Clasificacion</button>
   </nav>
 
   <div class="layout">
@@ -71,14 +71,6 @@
           <button onclick="loadTournaments()">Listar torneos</button>
         </div>
         <div class="card">
-          <h2>Autosimular todo el torneo</h2>
-          <p>Arma grupos, partidos, marcadores y el bracket completo de un solo clic.</p>
-          <label>Torneo</label>
-          <select id="autoTournament" onchange="onTournamentChange()"></select>
-          <button onclick="autosimulateCurrent()">Autosimular este torneo</button>
-          <button onclick="createAndSimulate()">Crear torneo y autosimular</button>
-        </div>
-        <div class="card">
           <h2>Torneos</h2>
           <div id="tournamentsTable"></div>
         </div>
@@ -99,6 +91,10 @@
             <button type="button" onclick="quickGroup('Grupo B')">Grupo B</button>
             <button type="button" onclick="quickGroup('Grupo C')">Grupo C</button>
             <button type="button" onclick="quickGroup('Grupo D')">Grupo D</button>
+            <button type="button" onclick="quickGroup('Grupo E')">Grupo E</button>
+            <button type="button" onclick="quickGroup('Grupo F')">Grupo F</button>
+            <button type="button" onclick="quickGroup('Grupo G')">Grupo G</button>
+            <button type="button" onclick="quickGroup('Grupo H')">Grupo H</button>
           </div>
         </div>
         <div class="card">
@@ -112,9 +108,9 @@
           <button onclick="assignTeams()">Guardar equipos en el grupo</button>
         </div>
         <div class="card">
-          <h2>Autosimular todo el torneo</h2>
-          <p>Completa los 8 grupos, genera todos los partidos y corre el mundial hasta la final.</p>
-          <button onclick="autosimulateCurrent()">Autosimular este torneo</button>
+          <h2>5. Generar fase de grupos</h2>
+          <p>Crea los 48 partidos (6 por grupo) cuando existan 8 grupos con 4 equipos.</p>
+          <button onclick="generateGroupStage()">Generar partidos de grupos</button>
         </div>
       </section>
 
@@ -136,11 +132,12 @@
             </div>
           </div>
           <button onclick="createMatch()">Crear partido</button>
+          <button onclick="generateGroupStage()">Generar partidos de grupos</button>
           <button onclick="loadMatches()">Listar partidos</button>
-          <button onclick="autosimulateCurrent()">Autosimular todo el torneo</button>
         </div>
         <div class="card">
           <h2>Cargar resultado</h2>
+          <p>Al completar una fase, la siguiente ronda se crea sola. En eliminatoria no hay empates.</p>
           <label>Partido</label>
           <select id="scoreMatch"></select>
           <div class="row">
@@ -161,18 +158,17 @@
         </div>
       </section>
 
-      <section id="simulacion" class="panel hidden">
+      <section id="clasificacion" class="panel hidden">
         <div class="card">
-          <h2>Carga automatica del Mundial</h2>
-          <p>Arma 8 grupos de 4, todos los partidos de fase de grupos, resultados simulados y el bracket hasta la final.</p>
+          <h2>Tabla y bracket</h2>
+          <p>Consulta las posiciones reales y las rondas creadas al registrar marcadores.</p>
           <label>Torneo</label>
-          <select id="simTournament"></select>
-          <button onclick="simulateMundial()">Autosimular Mundial completo</button>
-          <button onclick="createAndSimulate()">Crear torneo y autosimular</button>
+          <select id="standingsTournament" onchange="onTournamentChange()"></select>
+          <button onclick="loadClassification()">Actualizar clasificacion</button>
         </div>
         <div class="card">
           <h2>Resultado</h2>
-          <div id="mundialResult">Todavia no hay simulacion.</div>
+          <div id="classificationResult">Todavia no hay partidos.</div>
         </div>
       </section>
     </div>
@@ -198,6 +194,7 @@
     function showTab(tab) {
       document.querySelectorAll(".tab").forEach(item => item.classList.toggle("active", item.dataset.tab === tab));
       document.querySelectorAll(".panel").forEach(item => item.classList.toggle("hidden", item.id !== tab));
+      if (tab === "clasificacion") loadClassification().catch(() => {});
     }
 
     async function request(method, path, body) {
@@ -240,7 +237,7 @@
     }
 
     function tournamentSelects() {
-      return ["groupTournament", "matchTournament", "simTournament", "autoTournament"]
+      return ["groupTournament", "matchTournament", "standingsTournament"]
         .map(id => document.getElementById(id))
         .filter(Boolean);
     }
@@ -258,6 +255,8 @@
       setCurrentTournament(value);
       selectedGroupId = "";
       loadGroups();
+      loadMatches().catch(() => {});
+      loadClassification().catch(() => {});
     }
 
     function renderTeamChecks() {
@@ -349,12 +348,11 @@
 
     async function loadTournaments() {
       const tournaments = await request("GET", "/tournaments");
-      table(document.getElementById("tournamentsTable"), ["Id", "Nombre", "Formato", "Acciones"],
+      table(document.getElementById("tournamentsTable"), ["Id", "Nombre", "Formato"],
         tournaments.map(item => [
           item.id,
           item.name,
-          formatLabel(item.format && item.format.type),
-          "<button type='button' onclick=\"autosimulateTournament('" + item.id + "')\">Autosimular</button>"
+          formatLabel(item.format && item.format.type)
         ]));
       tournamentSelects().forEach(select => fillSelect(select, tournaments, t => t.name));
       if (tournaments.length) await loadGroups();
@@ -403,6 +401,18 @@
       await loadGroups();
     }
 
+    function teamName(match, side) {
+      const team = side === "home" ? match.homeTeam : match.visitorTeam;
+      const id = side === "home" ? match.homeTeamId : match.visitorTeamId;
+      return team ? team.name : id;
+    }
+
+    function winnerName(match) {
+      if (match.winner === "HOME") return teamName(match, "home");
+      if (match.winner === "VISITOR") return teamName(match, "visitor");
+      return "-";
+    }
+
     async function loadMatches() {
       const tournamentId = currentTournament();
       if (!tournamentId) return [];
@@ -410,15 +420,13 @@
       table(document.getElementById("matchesTable"), ["Fase", "Local", "Visitante", "Marcador", "Ganador"],
         matches.map(match => [
           stageLabel(match.stage),
-          match.homeTeam ? match.homeTeam.name : match.homeTeamId,
-          match.visitorTeam ? match.visitorTeam.name : match.visitorTeamId,
+          teamName(match, "home"),
+          teamName(match, "visitor"),
           match.score.homeTeamScore + " - " + match.score.visitorTeamScore,
-          match.winner || "-"
+          winnerName(match)
         ]));
       fillSelect(document.getElementById("scoreMatch"), matches, match => {
-        const home = match.homeTeam ? match.homeTeam.name : match.homeTeamId;
-        const visitor = match.visitorTeam ? match.visitorTeam.name : match.visitorTeamId;
-        return home + " vs " + visitor;
+        return stageLabel(match.stage) + ": " + teamName(match, "home") + " vs " + teamName(match, "visitor");
       });
       return matches;
     }
@@ -431,6 +439,17 @@
         visitorTeamId: document.getElementById("visitorTeam").value
       });
       await loadMatches();
+    }
+
+    async function generateGroupStage() {
+      const tournamentId = currentTournament();
+      if (!tournamentId) {
+        document.getElementById("log").textContent = "Crea o selecciona un torneo primero.";
+        return;
+      }
+      await request("POST", "/tournaments/" + tournamentId + "/matches/group-stage");
+      await loadMatches();
+      await loadClassification();
     }
 
     function formatLabel(type) {
@@ -448,14 +467,17 @@
       }[stage] || stage || "Grupos";
     }
 
-    function renderMundial(data) {
-      const box = document.getElementById("mundialResult");
-      let html = "<div class='champ'><p><b>Campeon:</b> " + data.championName + "</p>";
-      html += "<p>Subcampeon: " + data.runnerUpName + "</p>";
-      html += "<p>Tercer lugar: " + data.thirdPlaceName + "</p></div>";
+    function renderClassification(standings, matches) {
+      const box = document.getElementById("classificationResult");
+      const final = matches.find(match => match.stage === "FINAL" && match.isCompleted);
+      const third = matches.find(match => match.stage === "THIRD_PLACE" && match.isCompleted);
+      let html = "<div class='champ'>";
+      html += "<p><b>Campeon:</b> " + (final ? winnerName(final) : "pendiente") + "</p>";
+      html += "<p>Subcampeon: " + (final ? (final.winner === "HOME" ? teamName(final, "visitor") : teamName(final, "home")) : "pendiente") + "</p>";
+      html += "<p>Tercer lugar: " + (third ? winnerName(third) : "pendiente") + "</p></div>";
 
       const groups = {};
-      (data.standings || []).forEach(row => {
+      (standings || []).forEach(row => {
         groups[row.groupName] = groups[row.groupName] || [];
         groups[row.groupName].push(row);
       });
@@ -470,51 +492,32 @@
       });
       html += "</div><div class='bracket'>";
       ["ROUND_OF_16", "QUARTERFINAL", "SEMIFINAL", "THIRD_PLACE", "FINAL"].forEach(stage => {
-        const rows = (data.matches || []).filter(match => match.stage === stage);
+        const rows = (matches || []).filter(match => match.stage === stage);
         if (!rows.length) return;
         html += "<h3>" + stageLabel(stage) + "</h3><table><tr><th>Local</th><th>Visitante</th><th>Marcador</th><th>Gana</th></tr>";
         rows.forEach(match => {
-          html += "<tr><td>" + match.homeTeamName + "</td><td>" + match.visitorTeamName + "</td><td>" +
+          html += "<tr><td>" + teamName(match, "home") + "</td><td>" + teamName(match, "visitor") + "</td><td>" +
             match.score.homeTeamScore + " - " + match.score.visitorTeamScore + "</td><td>" +
-            (match.winnerTeamName || "-") + "</td></tr>";
+            winnerName(match) + "</td></tr>";
         });
         html += "</table>";
       });
       html += "</div>";
-      box.innerHTML = html;
+      if (!standings.length && !matches.length)
+        box.innerHTML = "<p>Todavia no hay partidos.</p>";
+      else
+        box.innerHTML = html;
     }
 
-    async function autosimulateCurrent() {
-      await autosimulateTournament(currentTournament());
-    }
-
-    async function autosimulateTournament(tournamentId) {
+    async function loadClassification() {
+      const tournamentId = currentTournament();
       if (!tournamentId) {
-        document.getElementById("log").textContent = "Crea o selecciona un torneo primero.";
+        document.getElementById("classificationResult").innerHTML = "<p>Selecciona un torneo.</p>";
         return;
       }
-      setCurrentTournament(tournamentId);
-      showTab("simulacion");
-      const data = await request("POST", "/tournaments/" + tournamentId + "/mundial");
-      renderMundial(data);
-      await loadTournaments();
-      await loadTeams();
-      await loadMatches();
-      setCurrentTournament(tournamentId);
-    }
-
-    async function simulateMundial() {
-      await autosimulateTournament(document.getElementById("simTournament").value || currentTournament());
-    }
-
-    async function createAndSimulate() {
-      const created = await request("POST", "/tournaments", {
-        name: "Mundial simulado " + Date.now(),
-        format: { type: "FIFA", maxGroups: 8, maxTeamsPerGroup: 4 }
-      });
-      await loadTournaments();
-      setCurrentTournament(created.id);
-      await autosimulateTournament(created.id);
+      const standings = await request("GET", "/tournaments/" + tournamentId + "/standings");
+      const matches = await request("GET", "/tournaments/" + tournamentId + "/matches");
+      renderClassification(standings, matches);
     }
 
     async function updateScore() {
@@ -525,6 +528,7 @@
         visitorTeamScore: Number(document.getElementById("visitorScore").value)
       });
       await loadMatches();
+      await loadClassification();
     }
 
     loadTeams().then(loadTournaments).catch(() => {});

@@ -150,7 +150,7 @@ public static class TournamentRoutes
                 home is null ? null : new TeamDto(home.Id, home.Name),
                 visitor is null ? null : new TeamDto(visitor.Id, visitor.Name),
                 new ScoreDto(match.Score.HomeTeamScore, match.Score.VisitorTeamScore),
-                match.Winner, match.IsCompleted, match.Stage);
+                match.Winner, match.IsCompleted, match.Stage, match.RoundPosition);
         }).ToList();
 
         return new TournamentDto(

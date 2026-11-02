@@ -15,9 +15,12 @@ public static class MatchRoutes
         var group = app.MapGroup("/tournaments/{tournamentId}/matches").WithTags("Matches");
         group.MapGet("/", GetAll);
         group.MapGet("/{matchId}", GetById);
+        group.MapPost("/group-stage", GenerateGroupStage);
         group.MapPost("/", Create);
         group.MapPatch("/{matchId}/score", UpdateScore);
         group.MapDelete("/{matchId}", Delete);
+        app.MapGet("/tournaments/{tournamentId}/standings", GetStandings)
+            .WithTags("Matches");
         return app;
     }
 
@@ -51,6 +54,45 @@ public static class MatchRoutes
         return result is null
             ? TypedResults.NotFound()
             : TypedResults.Ok(ToDto(result, await TeamLookup(teams, cancellationToken)));
+    }
+
+    private static async Task<IResult> GetStandings(string tournamentId, IMatchDelegate matches,
+        CancellationToken cancellationToken)
+    {
+        if (!IsValidId(tournamentId))
+            return InvalidId("tournamentId");
+
+        try
+        {
+            var standings = await matches.GetStandingsAsync(tournamentId, cancellationToken);
+            return TypedResults.Ok(standings.Select(ToDto).ToList());
+        }
+        catch (TournamentNotFoundException)
+        {
+            return TypedResults.NotFound();
+        }
+    }
+
+    private static async Task<IResult> GenerateGroupStage(string tournamentId, IMatchDelegate matches,
+        ITeamDelegate teams, CancellationToken cancellationToken)
+    {
+        if (!IsValidId(tournamentId))
+            return InvalidId("tournamentId");
+
+        try
+        {
+            var generated = await matches.GenerateGroupStageAsync(tournamentId, cancellationToken);
+            var lookup = await TeamLookup(teams, cancellationToken);
+            return TypedResults.Ok(generated.Select(match => ToDto(match, lookup)).ToList());
+        }
+        catch (TournamentNotFoundException)
+        {
+            return TypedResults.NotFound();
+        }
+        catch (MatchRuleViolationException ex)
+        {
+            return TypedResults.Problem(ex.Message, statusCode: StatusCodes.Status422UnprocessableEntity);
+        }
     }
 
     private static async Task<IResult> Create(string tournamentId, CreateMatchDto dto, IMatchDelegate matches,
@@ -114,6 +156,10 @@ public static class MatchRoutes
         {
             return TypedResults.NotFound();
         }
+        catch (MatchRuleViolationException ex)
+        {
+            return TypedResults.Problem(ex.Message, statusCode: StatusCodes.Status422UnprocessableEntity);
+        }
     }
 
     private static async Task<IResult> Delete(string tournamentId, string matchId, IMatchDelegate matches,
@@ -133,12 +179,16 @@ public static class MatchRoutes
         {
             return TypedResults.NotFound();
         }
+        catch (MatchRuleViolationException ex)
+        {
+            return TypedResults.Problem(ex.Message, statusCode: StatusCodes.Status422UnprocessableEntity);
+        }
     }
 
     private static MatchDto ToDto(DomainMatch match)
         => new(match.Id, match.TournamentId, match.GroupId, match.HomeTeamId, match.VisitorTeamId,
             null, null, new ScoreDto(match.Score.HomeTeamScore, match.Score.VisitorTeamScore),
-            match.Winner, match.IsCompleted, match.Stage);
+            match.Winner, match.IsCompleted, match.Stage, match.RoundPosition);
 
     private static async Task<Dictionary<string, Team>> TeamLookup(ITeamDelegate teams, CancellationToken cancellationToken)
     {
@@ -154,8 +204,13 @@ public static class MatchRoutes
             home is null ? null : new TeamDto(home.Id, home.Name),
             visitor is null ? null : new TeamDto(visitor.Id, visitor.Name),
             new ScoreDto(match.Score.HomeTeamScore, match.Score.VisitorTeamScore), match.Winner, match.IsCompleted,
-            match.Stage);
+            match.Stage, match.RoundPosition);
     }
+
+    private static MundialStandingDto ToDto(GroupStanding row)
+        => new(row.GroupId, row.GroupName, row.Rank, row.TeamId, row.TeamName,
+            row.Played, row.Won, row.Drawn, row.Lost, row.GoalsFor, row.GoalsAgainst,
+            row.GoalDifference, row.Points);
 
     private static bool IsValidId(string id) => Regex.IsMatch(id, Team.IdPattern);
 

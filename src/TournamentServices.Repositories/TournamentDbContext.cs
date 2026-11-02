@@ -53,6 +53,7 @@ public class TournamentDbContext(DbContextOptions<TournamentDbContext> options) 
             match.Property(item => item.HomeTeamId).IsRequired();
             match.Property(item => item.VisitorTeamId).IsRequired();
             match.Property(item => item.Stage).IsRequired().HasDefaultValue(MatchStages.Group);
+            match.Property(item => item.RoundPosition);
             match.Ignore(item => item.WinnerTeamId);
             match.Ignore(item => item.LoserTeamId);
             match.Property(item => item.Winner).HasConversion<string>();

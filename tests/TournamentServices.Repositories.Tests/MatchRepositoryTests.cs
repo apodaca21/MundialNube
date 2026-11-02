@@ -102,6 +102,26 @@ public class MatchRepositoryTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task AddRange_AndGetByStage_PreserveRoundOrder()
+    {
+        await using (var writeDb = CreateContext())
+        {
+            await new MatchRepository(writeDb).AddRangeAsync(
+            [
+                new Match("match-2", "cup-1", null, "h2", "a2", MatchStages.RoundOf16, 2),
+                new Match("match-1", "cup-1", null, "h1", "a1", MatchStages.RoundOf16, 1)
+            ]);
+        }
+
+        await using var readDb = CreateContext();
+        var matches = await new MatchRepository(readDb)
+            .GetByTournamentAndStageAsync("cup-1", MatchStages.RoundOf16);
+
+        Assert.Equal(["match-1", "match-2"], matches.Select(match => match.Id).ToArray());
+        Assert.Equal([1, 2], matches.Select(match => match.RoundPosition!.Value).ToArray());
+    }
+
+    [Fact]
     public async Task DeleteAsync_RemovesMatch()
     {
         await using (var writeDb = CreateContext())

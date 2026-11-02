@@ -7,6 +7,7 @@ public class CreateMatchDtoValidator : AbstractValidator<CreateMatchDto>
 {
     public CreateMatchDtoValidator()
     {
+        RuleFor(dto => dto.GroupId).NotEmpty();
         RuleFor(dto => dto.HomeTeamId).NotEmpty();
         RuleFor(dto => dto.VisitorTeamId).NotEmpty();
     }

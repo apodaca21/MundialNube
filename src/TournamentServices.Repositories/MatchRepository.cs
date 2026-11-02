@@ -7,9 +7,24 @@ public class MatchRepository(TournamentDbContext db) : IMatchRepository
 {
     public async Task<IReadOnlyList<Match>> GetByTournamentIdAsync(string tournamentId, CancellationToken cancellationToken = default)
     {
-        return await db.Matches.AsNoTracking()
+        var matches = await db.Matches.AsNoTracking()
             .Where(match => match.TournamentId == tournamentId)
-            .OrderBy(match => match.Id)
+            .ToListAsync(cancellationToken);
+        return matches
+            .OrderBy(match => MatchStages.OrderOf(match.Stage))
+            .ThenBy(match => match.RoundPosition ?? int.MaxValue)
+            .ThenBy(match => match.GroupId)
+            .ThenBy(match => match.Id)
+            .ToList();
+    }
+
+    public async Task<IReadOnlyList<Match>> GetByTournamentAndStageAsync(string tournamentId, string stage,
+        CancellationToken cancellationToken = default)
+    {
+        return await db.Matches.AsNoTracking()
+            .Where(match => match.TournamentId == tournamentId && match.Stage == stage)
+            .OrderBy(match => match.RoundPosition)
+            .ThenBy(match => match.Id)
             .ToListAsync(cancellationToken);
     }
 
@@ -37,6 +52,15 @@ public class MatchRepository(TournamentDbContext db) : IMatchRepository
     public async Task AddAsync(Match match, CancellationToken cancellationToken = default)
     {
         db.Matches.Add(match);
+        await db.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task AddRangeAsync(IReadOnlyCollection<Match> matches, CancellationToken cancellationToken = default)
+    {
+        if (matches.Count == 0)
+            return;
+
+        db.Matches.AddRange(matches);
         await db.SaveChangesAsync(cancellationToken);
     }
 

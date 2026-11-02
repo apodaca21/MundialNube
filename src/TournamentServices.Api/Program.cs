@@ -26,7 +26,6 @@ builder.Services.AddScoped<IMatchRepository, MatchRepository>();
 builder.Services.AddScoped<ITeamDelegate, TeamDelegate>();
 builder.Services.AddScoped<IGroupDelegate, GroupDelegate>();
 builder.Services.AddScoped<IMatchDelegate, MatchDelegate>();
-builder.Services.AddScoped<IMundialDelegate, MundialDelegate>();
 builder.Services.AddScoped<IValidator<CreateTeamDto>, CreateTeamDtoValidator>();
 builder.Services.AddScoped<IValidator<UpdateTeamDto>, UpdateTeamDtoValidator>();
 builder.Services.AddScoped<IValidator<CreateGroupDto>, CreateGroupDtoValidator>();
@@ -55,6 +54,8 @@ using (var scope = app.Services.CreateScope())
         await database.Database.ExecuteSqlRawAsync(
             """ALTER TABLE "Matches" ADD COLUMN IF NOT EXISTS "Stage" text NOT NULL DEFAULT 'GROUP';""");
         await database.Database.ExecuteSqlRawAsync(
+            """ALTER TABLE "Matches" ADD COLUMN IF NOT EXISTS "RoundPosition" integer NULL;""");
+        await database.Database.ExecuteSqlRawAsync(
             """UPDATE "Tournaments" SET "Format_Type" = 'FIFA' WHERE "Format_Type" IS DISTINCT FROM 'FIFA';""");
     }
 }
@@ -73,7 +74,6 @@ app.MapTeamRoutes();
 app.MapTournamentRoutes();
 app.MapGroupRoutes();
 app.MapMatchRoutes();
-app.MapMundialRoutes();
 
 app.Run();
 

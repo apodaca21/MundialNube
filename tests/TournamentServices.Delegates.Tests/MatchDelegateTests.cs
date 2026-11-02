@@ -15,6 +15,12 @@ public class MatchDelegateTests
 
     public MatchDelegateTests()
     {
+        _matches.Setup(r => r.GetByTournamentAndStageAsync(
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Array.Empty<Domain.Match>());
+        _groups.Setup(r => r.GetByTournamentIdAsync(
+                It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Array.Empty<Group>());
         _delegate = new MatchDelegate(_matches.Object, _groups.Object, _teams.Object, _tournaments.Object);
     }
 
@@ -63,7 +69,7 @@ public class MatchDelegateTests
         SetupTeam("team-1");
 
         await Assert.ThrowsAsync<MatchRuleViolationException>(() =>
-            _delegate.CreateAsync("cup-1", null, "team-1", "team-1"));
+            _delegate.CreateAsync("cup-1", "group-1", "team-1", "team-1"));
     }
 
     [Fact]
@@ -73,17 +79,15 @@ public class MatchDelegateTests
         SetupTeam("team-1");
 
         await Assert.ThrowsAsync<TeamNotFoundException>(() =>
-            _delegate.CreateAsync("cup-1", null, "team-1", "missing"));
+            _delegate.CreateAsync("cup-1", "group-1", "team-1", "missing"));
     }
 
     [Fact]
-    public async Task CreateAsync_Throws_WhenTeamIsNotInTournament()
+    public async Task CreateAsync_Throws_WhenGroupIsMissing()
     {
         var tournament = SetupTournament();
         SetupTeam("team-1");
         SetupTeam("team-2");
-        _groups.Setup(r => r.GetByTournamentIdAsync(tournament.Id, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Array.Empty<Group>());
 
         await Assert.ThrowsAsync<MatchRuleViolationException>(() =>
             _delegate.CreateAsync(tournament.Id, null, "team-1", "team-2"));

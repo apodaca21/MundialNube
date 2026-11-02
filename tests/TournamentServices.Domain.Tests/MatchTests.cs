@@ -1,5 +1,6 @@
 using TournamentServices.Domain;
 using TournamentServices.Domain.Enums;
+using TournamentServices.Domain.Exceptions;
 
 namespace TournamentServices.Domain.Tests;
 
@@ -46,5 +47,16 @@ public class MatchTests
 
         Assert.Null(match.Winner);
         Assert.True(match.IsCompleted);
+    }
+
+    [Fact]
+    public void UpdateScore_RejectsDrawForKnockoutMatch()
+    {
+        var match = new Match("match-1", "cup-1", null, "home-1", "away-1",
+            MatchStages.RoundOf16, 1);
+
+        Assert.Throws<MatchRuleViolationException>(() => match.UpdateScore(new Score(1, 1)));
+        Assert.False(match.IsCompleted);
+        Assert.Equal(1, match.RoundPosition);
     }
 }
