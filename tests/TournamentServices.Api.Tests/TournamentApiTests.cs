@@ -39,7 +39,7 @@ public class TournamentWebApplicationFactory : WebApplicationFactory<Program>
         builder.ConfigureTestServices(services =>
         {
             services.RemoveAll<ITeamRepository>();
-            services.AddSingleton<ITeamRepository, TeamRepository>();
+            services.AddScoped<ITeamRepository, TournamentTeamCatalogRepository>();
             services.RemoveAll<TournamentDbContext>();
             services.RemoveAll<DbContextOptions<TournamentDbContext>>();
             services.RemoveAll<IDbContextOptionsConfiguration<TournamentDbContext>>();

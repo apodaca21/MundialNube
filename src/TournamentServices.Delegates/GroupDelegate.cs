@@ -64,8 +64,10 @@ public class GroupDelegate(
 
         foreach (var teamId in teamIds)
         {
-            if (await teamRepository.GetByIdAsync(teamId, cancellationToken) is null)
-                throw new TeamNotFoundException(teamId);
+            var team = await teamRepository.GetByIdAsync(teamId, cancellationToken)
+                ?? throw new TeamNotFoundException(teamId);
+            if (team.TournamentId is not null && team.TournamentId != tournamentId)
+                throw new GroupRuleViolationException("A generated team can only participate in its own tournament.");
         }
 
         group.AssignTeams(teamIds);

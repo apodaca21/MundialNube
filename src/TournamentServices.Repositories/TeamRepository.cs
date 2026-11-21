@@ -51,6 +51,7 @@ public class TeamRepository : ITeamRepository
     private static Team Copy(Team team) => new()
     {
         Id = team.Id,
-        Name = team.Name
+        Name = team.Name,
+        TournamentId = team.TournamentId
     };
 }

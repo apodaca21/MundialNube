@@ -485,3 +485,6 @@ $RECYCLE.BIN/
 tournaments.db
 tournaments.db-shm
 tournaments.db-wal
+
+# Configuración local de Docker Compose
+.env

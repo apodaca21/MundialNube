@@ -30,7 +30,11 @@ public static class MatchRoutes
         try
         {
             var result = await matches.GetByTournamentAsync(tournamentId, cancellationToken);
-            return TypedResults.Ok(await Task.WhenAll(result.Select(match => ToDto(match, teams, cancellationToken))));
+            // Team lookups share the request's EF DbContext and must run sequentially.
+            var dtos = new List<MatchDto>();
+            foreach (var match in result)
+                dtos.Add(await ToDto(match, teams, cancellationToken));
+            return TypedResults.Ok(dtos);
         }
         catch (TournamentNotFoundException)
         {

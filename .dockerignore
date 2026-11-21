@@ -1,0 +1,11 @@
+.git
+.env
+**/bin
+**/obj
+**/TestResults
+**/*.db
+**/*.db-shm
+**/*.db-wal
+tests
+monitoring
+*.md

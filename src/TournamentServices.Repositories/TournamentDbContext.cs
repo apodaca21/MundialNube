@@ -9,6 +9,9 @@ public class TournamentDbContext(DbContextOptions<TournamentDbContext> options) 
     public DbSet<TournamentGroup> Groups => Set<TournamentGroup>();
     public DbSet<TournamentMatch> Matches => Set<TournamentMatch>();
 
+    public DbSet<TournamentTeam> TournamentTeams => Set<TournamentTeam>();
+    public DbSet<TournamentChampion> TournamentChampions => Set<TournamentChampion>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Tournament>().OwnsOne(tournament => tournament.Format, format =>
@@ -24,6 +27,22 @@ public class TournamentDbContext(DbContextOptions<TournamentDbContext> options) 
             .WithMany()
             .HasForeignKey(group => group.TournamentId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<TournamentTeam>()
+            .HasOne<Tournament>().WithMany()
+            .HasForeignKey(team => team.TournamentId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<TournamentTeam>()
+            .HasIndex(team => new { team.TournamentId, team.Name }).IsUnique();
+
+        // Historical snapshots deliberately have no foreign keys to live entities.
+        modelBuilder.Entity<TournamentChampion>()
+            .HasIndex(champion => champion.TournamentId).IsUnique();
+        modelBuilder.Entity<TournamentChampion>()
+            .HasIndex(champion => new { champion.CompletedAtUtc, champion.Id });
+        modelBuilder.Entity<TournamentChampion>()
+            .Property(champion => champion.CompletedAtUtc)
+            .HasConversion(value => value, value => DateTime.SpecifyKind(value, DateTimeKind.Utc));
 
         modelBuilder.Entity<TournamentMatch>()
             .HasOne<TournamentGroup>()

@@ -26,8 +26,8 @@ public class MatchDelegate(
         if (homeTeamId == visitorTeamId)
             throw new MatchRuleViolationException("A match cannot have the same home and visitor team.");
 
-        await EnsureTeamExists(homeTeamId, cancellationToken);
-        await EnsureTeamExists(visitorTeamId, cancellationToken);
+        await EnsureTeamCanParticipate(tournamentId, homeTeamId, cancellationToken);
+        await EnsureTeamCanParticipate(tournamentId, visitorTeamId, cancellationToken);
 
         if (groupId is not null)
         {
@@ -61,10 +61,12 @@ public class MatchDelegate(
         await matchRepository.DeleteAsync(matchId, cancellationToken);
     }
 
-    private async Task EnsureTeamExists(string teamId, CancellationToken cancellationToken)
+    private async Task EnsureTeamCanParticipate(string tournamentId, string teamId, CancellationToken cancellationToken)
     {
-        if (await teamRepository.GetByIdAsync(teamId, cancellationToken) is null)
-            throw new TeamNotFoundException(teamId);
+        var team = await teamRepository.GetByIdAsync(teamId, cancellationToken)
+            ?? throw new TeamNotFoundException(teamId);
+        if (team.TournamentId is not null && team.TournamentId != tournamentId)
+            throw new MatchRuleViolationException("A generated team can only participate in its own tournament.");
     }
 
     private async Task<Tournament> EnsureTournamentExists(string tournamentId, CancellationToken cancellationToken)

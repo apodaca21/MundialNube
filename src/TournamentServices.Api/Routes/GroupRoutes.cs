@@ -31,7 +31,10 @@ public static class GroupRoutes
         try
         {
             var result = await groups.GetByTournamentAsync(tournamentId, cancellationToken);
-            return TypedResults.Ok(await Task.WhenAll(result.Select(group => ToDto(group, teams, cancellationToken))));
+            var dtos = new List<GroupDto>();
+            foreach (var group in result)
+                dtos.Add(await ToDto(group, teams, cancellationToken));
+            return TypedResults.Ok(dtos);
         }
         catch (TournamentNotFoundException)
         {
@@ -183,9 +186,15 @@ public static class GroupRoutes
         if (teams is null)
             return new GroupDto(group.Id, group.Name, group.TournamentId, []);
 
-        var teamResults = await Task.WhenAll(group.TeamIds.Select(teamId => teams.GetByIdAsync(teamId, cancellationToken)));
-        return new GroupDto(group.Id, group.Name, group.TournamentId,
-            teamResults.Where(team => team is not null).Select(team => new TeamDto(team!.Id, team.Name)).ToList());
+        var teamDtos = new List<TeamDto>();
+        // Team lookups share the request's EF DbContext and must run sequentially.
+        foreach (var teamId in group.TeamIds)
+        {
+            var team = await teams.GetByIdAsync(teamId, cancellationToken);
+            if (team is not null)
+                teamDtos.Add(new TeamDto(team.Id, team.Name));
+        }
+        return new GroupDto(group.Id, group.Name, group.TournamentId, teamDtos);
     }
 
     private static bool IsValidId(string id) => Regex.IsMatch(id, Team.IdPattern);

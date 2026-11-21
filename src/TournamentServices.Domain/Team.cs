@@ -6,4 +6,7 @@ public class Team
 
     public string Id { get; set; } = Guid.NewGuid().ToString();
     public string Name { get; set; } = string.Empty;
+
+    /// <summary>Null for manually created global teams; generated teams belong to one tournament.</summary>
+    public string? TournamentId { get; set; }
 }
