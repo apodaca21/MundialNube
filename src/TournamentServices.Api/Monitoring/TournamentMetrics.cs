@@ -19,8 +19,8 @@ public sealed class TournamentMetrics : IDisposable
     {
         _registry = registry;
         var factory = Metrics.WithCustomRegistry(registry);
-        _tournaments = factory.CreateGauge("mundial_tournaments_total", "Tournaments currently stored in SQLite.");
-        _champions = factory.CreateGauge("mundial_champions_total", "Champion records stored in SQLite.");
+        _tournaments = factory.CreateGauge("mundial_tournaments_total", "Tournaments currently stored in the configured database.");
+        _champions = factory.CreateGauge("mundial_champions_total", "Champion records stored in the configured database.");
         _latest = factory.CreateGauge("mundial_latest_champion_info", "Most recently recorded champion.",
             ["team_name", "tournament_name"]);
         _recent = factory.CreateGauge("mundial_recent_champion_info", "Latest 20 champions, rank 1 is newest.",

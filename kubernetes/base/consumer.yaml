@@ -1,0 +1,70 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tournaments-consumer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tournaments-consumer
+  template:
+    metadata:
+      labels:
+        app: tournaments-consumer
+    spec:
+      containers:
+      - name: consumer
+        image: mundialnube-api:dev
+        imagePullPolicy: IfNotPresent
+        args:
+        - --consume
+        env:
+        - name: ASPNETCORE_HTTP_PORTS
+          value: '8080'
+        - name: Database__Provider
+          value: Postgres
+        - name: Database__MigrateOnStartup
+          value: 'false'
+        - name: ConnectionStrings__TournamentsConnection
+          valueFrom:
+            secretKeyRef:
+              name: mundial-secrets
+              key: database-connection
+        - name: Messaging__Enabled
+          value: 'true'
+        - name: Messaging__Host
+          value: activemq
+        - name: Messaging__Port
+          value: '61613'
+        - name: Messaging__Username
+          valueFrom:
+            secretKeyRef:
+              name: mundial-secrets
+              key: broker-user
+        - name: Messaging__Password
+          valueFrom:
+            secretKeyRef:
+              name: mundial-secrets
+              key: broker-password
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: http://tempo:4317
+        - name: OTEL_EXPORTER_OTLP_PROTOCOL
+          value: grpc
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: DOTNET_gcServer
+          value: '0'
+        - name: DOTNET_GCConserveMemory
+          value: '9'
+        - name: DOTNET_GCHeapHardLimitPercent
+          value: '35'
+        resources:
+          requests:
+            cpu: 50m
+            memory: 96Mi
+          limits:
+            cpu: 250m
+            memory: 256Mi

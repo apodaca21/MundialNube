@@ -15,7 +15,8 @@ public record MatchDto(
     TeamDto? VisitorTeam,
     ScoreDto Score,
     Winner? Winner,
-    bool IsCompleted);
+    bool IsCompleted,
+    int Round = 0);
 
 [JsonUnmappedMemberHandling(JsonUnmappedMemberHandling.Disallow)]
 public record CreateMatchDto(string? GroupId, string? HomeTeamId, string? VisitorTeamId);

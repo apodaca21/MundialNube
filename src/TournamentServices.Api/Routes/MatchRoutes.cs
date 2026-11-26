@@ -141,7 +141,7 @@ public static class MatchRoutes
     private static MatchDto ToDto(DomainMatch match)
         => new(match.Id, match.TournamentId, match.GroupId, match.HomeTeamId, match.VisitorTeamId,
             null, null, new ScoreDto(match.Score.HomeTeamScore, match.Score.VisitorTeamScore),
-            match.Winner, match.IsCompleted);
+            match.Winner, match.IsCompleted, match.Round);
 
     private static async Task<MatchDto> ToDto(DomainMatch match, ITeamDelegate teams, CancellationToken cancellationToken)
     {
@@ -150,7 +150,7 @@ public static class MatchRoutes
         return new MatchDto(match.Id, match.TournamentId, match.GroupId, match.HomeTeamId, match.VisitorTeamId,
             home is null ? null : new TeamDto(home.Id, home.Name),
             visitor is null ? null : new TeamDto(visitor.Id, visitor.Name),
-            new ScoreDto(match.Score.HomeTeamScore, match.Score.VisitorTeamScore), match.Winner, match.IsCompleted);
+            new ScoreDto(match.Score.HomeTeamScore, match.Score.VisitorTeamScore), match.Winner, match.IsCompleted, match.Round);
     }
 
     private static bool IsValidId(string id) => Regex.IsMatch(id, Team.IdPattern);

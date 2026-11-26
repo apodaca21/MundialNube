@@ -1,0 +1,88 @@
+LAST SEEN   TYPE      REASON                         OBJECT                                       MESSAGE
+8m49s       Normal    SuccessfulCreate               statefulset/tournament-db                    create Claim data-tournament-db-0 Pod tournament-db-0 in StatefulSet tournament-db success
+8m49s       Normal    Provisioning                   persistentvolumeclaim/data-tournament-db-0   External provisioner is provisioning volume for claim "mundialnube-v3/data-tournament-db-0"
+8m44s       Normal    ExternalProvisioning           persistentvolumeclaim/data-tournament-db-0   Waiting for a volume to be created either by the external provisioner 'rancher.io/local-path' or manually by the system administrator. If volume creation is delayed, please verify that the provisioner is running and correctly registered.
+8m49s       Normal    WaitForFirstConsumer           persistentvolumeclaim/data-tournament-db-0   waiting for first consumer to be created before binding
+8m49s       Normal    SuccessfulCreate               statefulset/tournament-db                    create Pod tournament-db-0 in StatefulSet tournament-db successful
+8m42s       Normal    ProvisioningSucceeded          persistentvolumeclaim/data-tournament-db-0   Successfully provisioned volume pvc-689510d5-adc6-4a6b-9612-24f5593c108a
+8m40s       Normal    Scheduled                      pod/tournament-db-0                          Successfully assigned mundialnube-v3/tournament-db-0 to mundial-v3-single-control-plane
+8m39s       Normal    Pulling                        pod/tournament-db-0                          Pulling image "postgres:16-alpine"
+8m16s       Normal    Created                        pod/tournament-db-0                          Created container: postgres
+8m16s       Normal    Pulled                         pod/tournament-db-0                          Successfully pulled image "postgres:16-alpine" in 22.888s (22.888s including waiting). Image size: 114083894 bytes.
+8m15s       Normal    Started                        pod/tournament-db-0                          Started container postgres
+8m13s       Warning   Unhealthy                      pod/tournament-db-0                          Readiness probe failed: /run/postgresql:5432 - no response
+8m7s        Normal    Scheduled                      pod/tournaments-migrate-n5bwf                Successfully assigned mundialnube-v3/tournaments-migrate-n5bwf to mundial-v3-single-control-plane
+8m8s        Normal    SuccessfulCreate               job/tournaments-migrate                      Created pod: tournaments-migrate-n5bwf
+7m53s       Normal    Pulling                        pod/tournaments-migrate-n5bwf                Pulling image "mundialnube-api:v3"
+7m52s       Warning   Failed                         pod/tournaments-migrate-n5bwf                Failed to pull image "mundialnube-api:v3": failed to pull and unpack image "docker.io/library/mundialnube-api:v3": failed to resolve reference "docker.io/library/mundialnube-api:v3": pull access denied, repository does not exist or may require authorization: server message: insufficient_scope: authorization failed
+7m52s       Warning   Failed                         pod/tournaments-migrate-n5bwf                Error: ErrImagePull
+7m39s       Warning   Failed                         pod/tournaments-migrate-n5bwf                Error: ImagePullBackOff
+7m39s       Normal    BackOff                        pod/tournaments-migrate-n5bwf                Back-off pulling image "mundialnube-api:v3"
+7m26s       Normal    Pulled                         pod/tournaments-migrate-n5bwf                Container image "mundialnube-api:v3" already present on machine
+7m26s       Normal    Created                        pod/tournaments-migrate-n5bwf                Created container: migrate
+7m25s       Normal    Started                        pod/tournaments-migrate-n5bwf                Started container migrate
+7m20s       Normal    Completed                      job/tournaments-migrate                      Job completed
+7m18s       Normal    ScalingReplicaSet              deployment/grafana                           Scaled up replica set grafana-68d9b8bbf8 from 0 to 1
+7m18s       Normal    WaitForFirstConsumer           persistentvolumeclaim/activemq-data          waiting for first consumer to be created before binding
+7m18s       Normal    SuccessfulCreate               replicaset/activemq-8656c7f8f4               Created pod: activemq-8656c7f8f4-j2rxm
+7m18s       Normal    SuccessfulCreate               replicaset/prometheus-54f95d4f7              Created pod: prometheus-54f95d4f7-7tkzf
+7m18s       Normal    WaitForFirstConsumer           persistentvolumeclaim/prometheus-data        waiting for first consumer to be created before binding
+7m18s       Normal    WaitForFirstConsumer           persistentvolumeclaim/tempo-data             waiting for first consumer to be created before binding
+7m18s       Normal    WaitForFirstConsumer           persistentvolumeclaim/grafana-data           waiting for first consumer to be created before binding
+7m18s       Normal    ScalingReplicaSet              deployment/activemq                          Scaled up replica set activemq-8656c7f8f4 from 0 to 1
+7m18s       Normal    ScalingReplicaSet              deployment/prometheus                        Scaled up replica set prometheus-54f95d4f7 from 0 to 1
+7m18s       Normal    SuccessfulCreate               replicaset/grafana-68d9b8bbf8                Created pod: grafana-68d9b8bbf8-zv586
+7m18s       Normal    ScalingReplicaSet              deployment/tempo                             Scaled up replica set tempo-5cbffc9f from 0 to 1
+7m17s       Normal    Provisioning                   persistentvolumeclaim/grafana-data           External provisioner is provisioning volume for claim "mundialnube-v3/grafana-data"
+7m18s       Normal    SuccessfulCreate               replicaset/tempo-5cbffc9f                    Created pod: tempo-5cbffc9f-n78s5
+7m14s       Normal    ExternalProvisioning           persistentvolumeclaim/tempo-data             Waiting for a volume to be created either by the external provisioner 'rancher.io/local-path' or manually by the system administrator. If volume creation is delayed, please verify that the provisioner is running and correctly registered.
+7m17s       Normal    ScalingReplicaSet              deployment/tournaments-api                   Scaled up replica set tournaments-api-cccbcd569 from 0 to 1
+7m17s       Normal    ScalingReplicaSet              deployment/traefik                           Scaled up replica set traefik-65fb895b67 from 0 to 1
+7m17s       Normal    SuccessfulCreate               replicaset/traefik-65fb895b67                Created pod: traefik-65fb895b67-r25lp
+7m17s       Normal    SuccessfulCreate               replicaset/tournaments-api-cccbcd569         Created pod: tournaments-api-cccbcd569-5hf9k
+7m16s       Normal    Scheduled                      pod/traefik-65fb895b67-r25lp                 Successfully assigned mundialnube-v3/traefik-65fb895b67-r25lp to mundial-v3-single-control-plane
+7m17s       Normal    Provisioning                   persistentvolumeclaim/prometheus-data        External provisioner is provisioning volume for claim "mundialnube-v3/prometheus-data"
+7m14s       Normal    ExternalProvisioning           persistentvolumeclaim/prometheus-data        Waiting for a volume to be created either by the external provisioner 'rancher.io/local-path' or manually by the system administrator. If volume creation is delayed, please verify that the provisioner is running and correctly registered.
+7m14s       Normal    ExternalProvisioning           persistentvolumeclaim/activemq-data          Waiting for a volume to be created either by the external provisioner 'rancher.io/local-path' or manually by the system administrator. If volume creation is delayed, please verify that the provisioner is running and correctly registered.
+7m17s       Normal    Provisioning                   persistentvolumeclaim/activemq-data          External provisioner is provisioning volume for claim "mundialnube-v3/activemq-data"
+7m14s       Normal    ExternalProvisioning           persistentvolumeclaim/grafana-data           Waiting for a volume to be created either by the external provisioner 'rancher.io/local-path' or manually by the system administrator. If volume creation is delayed, please verify that the provisioner is running and correctly registered.
+7m17s       Normal    Scheduled                      pod/tournaments-consumer-578df9d9f8-c2sw7    Successfully assigned mundialnube-v3/tournaments-consumer-578df9d9f8-c2sw7 to mundial-v3-single-control-plane
+7m17s       Normal    ScalingReplicaSet              deployment/tournaments-consumer              Scaled up replica set tournaments-consumer-578df9d9f8 from 0 to 1
+7m17s       Normal    Scheduled                      pod/tournaments-api-cccbcd569-5hf9k          Successfully assigned mundialnube-v3/tournaments-api-cccbcd569-5hf9k to mundial-v3-single-control-plane
+7m17s       Normal    SuccessfulCreate               replicaset/tournaments-consumer-578df9d9f8   Created pod: tournaments-consumer-578df9d9f8-c2sw7
+7m17s       Normal    Provisioning                   persistentvolumeclaim/tempo-data             External provisioner is provisioning volume for claim "mundialnube-v3/tempo-data"
+7m13s       Normal    Created                        pod/tournaments-api-cccbcd569-5hf9k          Created container: api
+7m13s       Normal    Pulled                         pod/tournaments-api-cccbcd569-5hf9k          Container image "mundialnube-api:v3" already present on machine
+7m13s       Normal    Created                        pod/tournaments-consumer-578df9d9f8-c2sw7    Created container: consumer
+7m13s       Normal    Pulling                        pod/traefik-65fb895b67-r25lp                 Pulling image "traefik:v3.8.0"
+7m13s       Normal    Pulled                         pod/tournaments-consumer-578df9d9f8-c2sw7    Container image "mundialnube-api:v3" already present on machine
+7m12s       Normal    Started                        pod/tournaments-api-cccbcd569-5hf9k          Started container api
+7m12s       Normal    Started                        pod/tournaments-consumer-578df9d9f8-c2sw7    Started container consumer
+7m11s       Normal    ProvisioningSucceeded          persistentvolumeclaim/grafana-data           Successfully provisioned volume pvc-b3990b66-cce5-48d0-b9f1-23c5bba95bc3
+2m32s       Warning   Unhealthy                      pod/tournaments-api-cccbcd569-5hf9k          Startup probe failed: Get "http://10.244.0.9:8080/health": dial tcp 10.244.0.9:8080: connect: connection refused
+7m11s       Normal    ProvisioningSucceeded          persistentvolumeclaim/activemq-data          Successfully provisioned volume pvc-bcbc77ea-8de5-43c7-b901-4cdc062f6983
+7m9s        Normal    Scheduled                      pod/grafana-68d9b8bbf8-zv586                 Successfully assigned mundialnube-v3/grafana-68d9b8bbf8-zv586 to mundial-v3-single-control-plane
+7m9s        Normal    Scheduled                      pod/activemq-8656c7f8f4-j2rxm                Successfully assigned mundialnube-v3/activemq-8656c7f8f4-j2rxm to mundial-v3-single-control-plane
+7m10s       Normal    ProvisioningSucceeded          persistentvolumeclaim/tempo-data             Successfully provisioned volume pvc-d42ab9c1-7cc2-445a-8acb-510039f726ae
+7m9s        Normal    ProvisioningSucceeded          persistentvolumeclaim/prometheus-data        Successfully provisioned volume pvc-2697499f-f7fa-4998-a3be-caf8803f371f
+7m2s        Normal    Scheduled                      pod/tempo-5cbffc9f-n78s5                     Successfully assigned mundialnube-v3/tempo-5cbffc9f-n78s5 to mundial-v3-single-control-plane
+7m          Normal    Scheduled                      pod/prometheus-54f95d4f7-7tkzf               Successfully assigned mundialnube-v3/prometheus-54f95d4f7-7tkzf to mundial-v3-single-control-plane
+7s          Warning   Unhealthy                      pod/tournament-db-0                          Readiness probe failed: command timed out: "pg_isready -U tournament_svc -d tournament_db" timed out after 1s
+6m50s       Warning   FailedComputeMetricsReplicas   horizontalpodautoscaler/tournaments-api      invalid metrics (1 invalid out of 1), first error is: failed to get cpu resource metric value: failed to get cpu utilization: unable to get metrics for resource cpu: no metrics returned from resource metrics API
+6m51s       Warning   FailedGetResourceMetric        horizontalpodautoscaler/tournaments-api      failed to get cpu utilization: unable to get metrics for resource cpu: no metrics returned from resource metrics API
+6m50s       Normal    Pulling                        pod/activemq-8656c7f8f4-j2rxm                Pulling image "apache/artemis:2.57.0-alpine"
+6m50s       Normal    Pulling                        pod/grafana-68d9b8bbf8-zv586                 Pulling image "grafana/grafana:13.3.1"
+2m47s       Warning   Unhealthy                      pod/tournaments-api-cccbcd569-5hf9k          Startup probe failed: Get "http://10.244.0.9:8080/health": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+2m53s       Warning   Unhealthy                      pod/tournaments-api-cccbcd569-5hf9k          Startup probe failed: Get "http://10.244.0.9:8080/health": dial tcp 10.244.0.9:8080: connect: connection refused (Client.Timeout exceeded while awaiting headers)
+4m7s        Normal    Pulling                        pod/prometheus-54f95d4f7-7tkzf               Pulling image "prom/prometheus:v3.16.0"
+4m7s        Normal    Pulling                        pod/tempo-5cbffc9f-n78s5                     Pulling image "grafana/tempo:3.1.1"
+3m22s       Normal    Pulled                         pod/traefik-65fb895b67-r25lp                 Successfully pulled image "traefik:v3.8.0" in 3m51.089s (3m51.092s including waiting). Image size: 58250958 bytes.
+3m21s       Normal    Created                        pod/traefik-65fb895b67-r25lp                 Created container: traefik
+3m19s       Normal    Started                        pod/traefik-65fb895b67-r25lp                 Started container traefik
+34s         Warning   Unhealthy                      pod/traefik-65fb895b67-r25lp                 Readiness probe failed: Get "http://10.244.0.10:8080/ping": dial tcp 10.244.0.10:8080: connect: connection refused
+3s          Warning   Unhealthy                      pod/traefik-65fb895b67-r25lp                 Readiness probe failed: Get "http://10.244.0.10:8080/ping": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+2m46s       Warning   Unhealthy                      pod/traefik-65fb895b67-r25lp                 Readiness probe failed: Get "http://10.244.0.10:8080/ping": dial tcp 10.244.0.10:8080: connect: connection refused (Client.Timeout exceeded while awaiting headers)
+31s         Normal    Pulled                         pod/activemq-8656c7f8f4-j2rxm                Successfully pulled image "apache/artemis:2.57.0-alpine" in 2m51.234s (6m19.251s including waiting). Image size: 131983719 bytes.
+31s         Normal    Created                        pod/activemq-8656c7f8f4-j2rxm                Created container: artemis
+30s         Normal    Started                        pod/activemq-8656c7f8f4-j2rxm                Started container artemis
+4s          Warning   Unhealthy                      pod/activemq-8656c7f8f4-j2rxm                Readiness probe failed: dial tcp 10.244.0.16:61613: connect: connection refused

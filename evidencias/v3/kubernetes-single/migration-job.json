@@ -1,0 +1,121 @@
+{
+    "apiVersion": "batch/v1",
+    "kind": "Job",
+    "metadata": {
+        "annotations": {
+            "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"batch/v1\",\"kind\":\"Job\",\"metadata\":{\"annotations\":{},\"name\":\"tournaments-migrate\",\"namespace\":\"mundialnube-v3\"},\"spec\":{\"activeDeadlineSeconds\":300,\"backoffLimit\":2,\"template\":{\"spec\":{\"containers\":[{\"args\":[\"--migrate\"],\"env\":[{\"name\":\"Database__Provider\",\"value\":\"Postgres\"},{\"name\":\"Database__MigrateOnStartup\",\"value\":\"false\"},{\"name\":\"ConnectionStrings__TournamentsConnection\",\"valueFrom\":{\"secretKeyRef\":{\"key\":\"database-connection\",\"name\":\"mundial-secrets\"}}}],\"image\":\"mundialnube-api:v3\",\"imagePullPolicy\":\"IfNotPresent\",\"name\":\"migrate\",\"resources\":{\"limits\":{\"cpu\":\"500m\",\"memory\":\"512Mi\"},\"requests\":{\"cpu\":\"100m\",\"memory\":\"128Mi\"}}}],\"restartPolicy\":\"Never\"}},\"ttlSecondsAfterFinished\":86400}}\n"
+        },
+        "creationTimestamp": "2026-11-26T03:37:38Z",
+        "generation": 1,
+        "labels": {
+            "batch.kubernetes.io/controller-uid": "73df05f4-622d-484d-8349-139ea26777ac",
+            "batch.kubernetes.io/job-name": "tournaments-migrate",
+            "controller-uid": "73df05f4-622d-484d-8349-139ea26777ac",
+            "job-name": "tournaments-migrate"
+        },
+        "name": "tournaments-migrate",
+        "namespace": "mundialnube-v3",
+        "resourceVersion": "946",
+        "uid": "73df05f4-622d-484d-8349-139ea26777ac"
+    },
+    "spec": {
+        "activeDeadlineSeconds": 300,
+        "backoffLimit": 2,
+        "completionMode": "NonIndexed",
+        "completions": 1,
+        "manualSelector": false,
+        "parallelism": 1,
+        "podReplacementPolicy": "TerminatingOrFailed",
+        "selector": {
+            "matchLabels": {
+                "batch.kubernetes.io/controller-uid": "73df05f4-622d-484d-8349-139ea26777ac"
+            }
+        },
+        "suspend": false,
+        "template": {
+            "metadata": {
+                "labels": {
+                    "batch.kubernetes.io/controller-uid": "73df05f4-622d-484d-8349-139ea26777ac",
+                    "batch.kubernetes.io/job-name": "tournaments-migrate",
+                    "controller-uid": "73df05f4-622d-484d-8349-139ea26777ac",
+                    "job-name": "tournaments-migrate"
+                }
+            },
+            "spec": {
+                "containers": [
+                    {
+                        "args": [
+                            "--migrate"
+                        ],
+                        "env": [
+                            {
+                                "name": "Database__Provider",
+                                "value": "Postgres"
+                            },
+                            {
+                                "name": "Database__MigrateOnStartup",
+                                "value": "false"
+                            },
+                            {
+                                "name": "ConnectionStrings__TournamentsConnection",
+                                "valueFrom": {
+                                    "secretKeyRef": {
+                                        "key": "database-connection",
+                                        "name": "mundial-secrets"
+                                    }
+                                }
+                            }
+                        ],
+                        "image": "mundialnube-api:v3",
+                        "imagePullPolicy": "IfNotPresent",
+                        "name": "migrate",
+                        "resources": {
+                            "limits": {
+                                "cpu": "500m",
+                                "memory": "512Mi"
+                            },
+                            "requests": {
+                                "cpu": "100m",
+                                "memory": "128Mi"
+                            }
+                        },
+                        "terminationMessagePath": "/dev/termination-log",
+                        "terminationMessagePolicy": "File"
+                    }
+                ],
+                "dnsPolicy": "ClusterFirst",
+                "restartPolicy": "Never",
+                "schedulerName": "default-scheduler",
+                "securityContext": {},
+                "terminationGracePeriodSeconds": 30
+            }
+        },
+        "ttlSecondsAfterFinished": 86400
+    },
+    "status": {
+        "completionTime": "2026-11-26T03:38:26Z",
+        "conditions": [
+            {
+                "lastProbeTime": "2026-11-26T03:38:26Z",
+                "lastTransitionTime": "2026-11-26T03:38:26Z",
+                "message": "Reached expected number of succeeded pods",
+                "reason": "CompletionsReached",
+                "status": "True",
+                "type": "SuccessCriteriaMet"
+            },
+            {
+                "lastProbeTime": "2026-11-26T03:38:26Z",
+                "lastTransitionTime": "2026-11-26T03:38:26Z",
+                "message": "Reached expected number of succeeded pods",
+                "reason": "CompletionsReached",
+                "status": "True",
+                "type": "Complete"
+            }
+        ],
+        "ready": 0,
+        "startTime": "2026-11-26T03:37:38Z",
+        "succeeded": 1,
+        "terminating": 0,
+        "uncountedTerminatedPods": {}
+    }
+}

@@ -1,0 +1,60 @@
+namespace/mundialnube-v3 unchanged
+statefulset.apps/tournament-db configured
+service/tournament-db created
+Waiting for 1 pods to be ready...
+partitioned roll out complete: 1 new pods have been updated...
+job.batch/tournaments-migrate created
+job.batch/tournaments-migrate condition met
+namespace/mundialnube-v3 unchanged
+serviceaccount/prometheus created
+serviceaccount/traefik created
+role.rbac.authorization.k8s.io/prometheus-pods created
+role.rbac.authorization.k8s.io/traefik-routing created
+clusterrole.rbac.authorization.k8s.io/mundial-v3-traefik created
+rolebinding.rbac.authorization.k8s.io/prometheus-pods created
+rolebinding.rbac.authorization.k8s.io/traefik-routing created
+clusterrolebinding.rbac.authorization.k8s.io/mundial-v3-traefik created
+configmap/grafana-dashboards-d2thcf48fc created
+configmap/grafana-datasources-c8g7d4k4f6 created
+configmap/grafana-providers-k5965btkg7 created
+configmap/prometheus-config-7fd6mt5ttk created
+configmap/tempo-config-427ck9bf2m created
+service/activemq created
+service/grafana created
+service/prometheus created
+service/tempo created
+service/tournament-db unchanged
+service/tournaments-api created
+service/traefik created
+persistentvolumeclaim/activemq-data created
+persistentvolumeclaim/grafana-data created
+persistentvolumeclaim/prometheus-data created
+persistentvolumeclaim/tempo-data created
+deployment.apps/activemq created
+deployment.apps/grafana created
+deployment.apps/prometheus created
+deployment.apps/tempo created
+deployment.apps/tournaments-api created
+deployment.apps/tournaments-consumer created
+deployment.apps/traefik created
+statefulset.apps/tournament-db configured
+horizontalpodautoscaler.autoscaling/tournaments-api created
+ingress.networking.k8s.io/tournaments-api created
+ingressclass.networking.k8s.io/mundial-traefik created
+Waiting for deployment "tournaments-api" rollout to finish: 0 out of 1 new replicas have been updated...
+Waiting for deployment "tournaments-api" rollout to finish: 0 of 1 updated replicas are available...
+W1125 19:39:48.456969   99044 reflector.go:492] k8s.io/client-go/tools/watch/informerwatcher.go:146: watch of *unstructured.Unstructured ended with: an error on the server ("unable to decode an event from the watch stream: http2: client connection lost") has prevented the request from succeeding
+W1125 19:40:00.042080   99044 reflector.go:569] k8s.io/client-go/tools/watch/informerwatcher.go:146: failed to list *unstructured.Unstructured: Get "https://127.0.0.1:63866/apis/apps/v1/namespaces/mundialnube-v3/deployments?fieldSelector=metadata.name%3Dtournaments-api&resourceVersion=1103": net/http: TLS handshake timeout
+E1125 19:40:00.181034   99044 reflector.go:166] "Unhandled Error" err="k8s.io/client-go/tools/watch/informerwatcher.go:146: Failed to watch *unstructured.Unstructured: failed to list *unstructured.Unstructured: Get \"https://127.0.0.1:63866/apis/apps/v1/namespaces/mundialnube-v3/deployments?fieldSelector=metadata.name%3Dtournaments-api&resourceVersion=1103\": net/http: TLS handshake timeout"
+W1125 19:40:14.826740   99044 reflector.go:569] k8s.io/client-go/tools/watch/informerwatcher.go:146: failed to list *unstructured.Unstructured: Get "https://127.0.0.1:63866/apis/apps/v1/namespaces/mundialnube-v3/deployments?fieldSelector=metadata.name%3Dtournaments-api&resourceVersion=1103": net/http: TLS handshake timeout
+E1125 19:40:15.508973   99044 reflector.go:166] "Unhandled Error" err="k8s.io/client-go/tools/watch/informerwatcher.go:146: Failed to watch *unstructured.Unstructured: failed to list *unstructured.Unstructured: Get \"https://127.0.0.1:63866/apis/apps/v1/namespaces/mundialnube-v3/deployments?fieldSelector=metadata.name%3Dtournaments-api&resourceVersion=1103\": net/http: TLS handshake timeout"
+W1125 19:40:30.296190   99044 reflector.go:569] k8s.io/client-go/tools/watch/informerwatcher.go:146: failed to list *unstructured.Unstructured: Get "https://127.0.0.1:63866/apis/apps/v1/namespaces/mundialnube-v3/deployments?fieldSelector=metadata.name%3Dtournaments-api&resourceVersion=1103": net/http: TLS handshake timeout
+E1125 19:40:30.340772   99044 reflector.go:166] "Unhandled Error" err="k8s.io/client-go/tools/watch/informerwatcher.go:146: Failed to watch *unstructured.Unstructured: failed to list *unstructured.Unstructured: Get \"https://127.0.0.1:63866/apis/apps/v1/namespaces/mundialnube-v3/deployments?fieldSelector=metadata.name%3Dtournaments-api&resourceVersion=1103\": net/http: TLS handshake timeout"
+W1125 19:40:54.574308   99044 reflector.go:569] k8s.io/client-go/tools/watch/informerwatcher.go:146: failed to list *unstructured.Unstructured: Get "https://127.0.0.1:63866/apis/apps/v1/namespaces/mundialnube-v3/deployments?fieldSelector=metadata.name%3Dtournaments-api&resourceVersion=1103": net/http: TLS handshake timeout
+E1125 19:40:55.107476   99044 reflector.go:166] "Unhandled Error" err="k8s.io/client-go/tools/watch/informerwatcher.go:146: Failed to watch *unstructured.Unstructured: failed to list *unstructured.Unstructured: Get \"https://127.0.0.1:63866/apis/apps/v1/namespaces/mundialnube-v3/deployments?fieldSelector=metadata.name%3Dtournaments-api&resourceVersion=1103\": net/http: TLS handshake timeout"
+W1125 19:41:23.117694   99044 reflector.go:569] k8s.io/client-go/tools/watch/informerwatcher.go:146: failed to list *unstructured.Unstructured: Get "https://127.0.0.1:63866/apis/apps/v1/namespaces/mundialnube-v3/deployments?fieldSelector=metadata.name%3Dtournaments-api&resourceVersion=1103": net/http: TLS handshake timeout
+E1125 19:41:23.156247   99044 reflector.go:166] "Unhandled Error" err="k8s.io/client-go/tools/watch/informerwatcher.go:146: Failed to watch *unstructured.Unstructured: failed to list *unstructured.Unstructured: Get \"https://127.0.0.1:63866/apis/apps/v1/namespaces/mundialnube-v3/deployments?fieldSelector=metadata.name%3Dtournaments-api&resourceVersion=1103\": net/http: TLS handshake timeout"
+W1125 19:42:04.063650   99044 reflector.go:569] k8s.io/client-go/tools/watch/informerwatcher.go:146: failed to list *unstructured.Unstructured: Get "https://127.0.0.1:63866/apis/apps/v1/namespaces/mundialnube-v3/deployments?fieldSelector=metadata.name%3Dtournaments-api&resourceVersion=1103": net/http: TLS handshake timeout
+E1125 19:42:04.153112   99044 reflector.go:166] "Unhandled Error" err="k8s.io/client-go/tools/watch/informerwatcher.go:146: Failed to watch *unstructured.Unstructured: failed to list *unstructured.Unstructured: Get \"https://127.0.0.1:63866/apis/apps/v1/namespaces/mundialnube-v3/deployments?fieldSelector=metadata.name%3Dtournaments-api&resourceVersion=1103\": net/http: TLS handshake timeout"
+Waiting for deployment "tournaments-api" rollout to finish: 0 of 1 updated replicas are available...
+error: timed out waiting for the condition

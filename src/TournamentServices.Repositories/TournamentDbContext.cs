@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Migrations;
+using TournamentServices.Repositories.Migrations;
 using TournamentServices.Domain;
 
 namespace TournamentServices.Repositories;
@@ -11,9 +13,24 @@ public class TournamentDbContext(DbContextOptions<TournamentDbContext> options) 
 
     public DbSet<TournamentTeam> TournamentTeams => Set<TournamentTeam>();
     public DbSet<TournamentChampion> TournamentChampions => Set<TournamentChampion>();
+    public DbSet<Team> ManualTeams => Set<Team>();
+    public DbSet<GroupTeam> GroupTeams => Set<GroupTeam>();
+    public DbSet<OutboxEvent> OutboxEvents => Set<OutboxEvent>();
+    public DbSet<ConsumedEvent> ConsumedEvents => Set<ConsumedEvent>();
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        => optionsBuilder.ReplaceService<IMigrationsAssembly, ProviderMigrationsAssembly>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Team>().ToTable("ManualTeams");
+        modelBuilder.Entity<Team>().Ignore(team => team.TournamentId);
+        modelBuilder.Entity<Team>().HasIndex(team => team.Name).IsUnique();
+        modelBuilder.Entity<GroupTeam>().HasKey(team => new { team.GroupId, team.TeamId });
+        modelBuilder.Entity<GroupTeam>().HasOne<TournamentGroup>().WithMany()
+            .HasForeignKey(team => team.GroupId).OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<GroupTeam>().HasIndex(team => team.TeamId);
+        modelBuilder.Entity<OutboxEvent>().HasIndex(message => new { message.PublishedAtUtc, message.OccurredAtUtc });
         modelBuilder.Entity<Tournament>().OwnsOne(tournament => tournament.Format, format =>
         {
             format.Property(value => value.Type).IsRequired();
@@ -27,6 +44,7 @@ public class TournamentDbContext(DbContextOptions<TournamentDbContext> options) 
             .WithMany()
             .HasForeignKey(group => group.TournamentId)
             .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<TournamentGroup>().HasIndex(group => new { group.TournamentId, group.Name }).IsUnique();
 
         modelBuilder.Entity<TournamentTeam>()
             .HasOne<Tournament>().WithMany()
@@ -49,5 +67,13 @@ public class TournamentDbContext(DbContextOptions<TournamentDbContext> options) 
             .WithMany()
             .HasForeignKey(match => match.GroupId)
             .OnDelete(DeleteBehavior.Cascade);
+        // Keep old stub match rows readable; operational rows always store TournamentId.
+        modelBuilder.Entity<TournamentMatch>().HasIndex(match => new { match.TournamentId, match.Round });
+        modelBuilder.Entity<TournamentMatch>().HasIndex(match => match.HomeTeamId);
+        modelBuilder.Entity<TournamentMatch>().HasIndex(match => match.VisitorTeamId);
+        modelBuilder.Entity<OutboxEvent>().Property(message => message.OccurredAtUtc)
+            .HasConversion(value => value, value => DateTime.SpecifyKind(value, DateTimeKind.Utc));
+        modelBuilder.Entity<ConsumedEvent>().Property(message => message.ConsumedAtUtc)
+            .HasConversion(value => value, value => DateTime.SpecifyKind(value, DateTimeKind.Utc));
     }
 }

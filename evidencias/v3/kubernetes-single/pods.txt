@@ -1,0 +1,10 @@
+NAME                                    READY   STATUS              RESTARTS   AGE     IP            NODE                              NOMINATED NODE   READINESS GATES
+activemq-8656c7f8f4-j2rxm               0/1     Running             0          7m16s   10.244.0.16   mundial-v3-single-control-plane   <none>           <none>
+grafana-68d9b8bbf8-zv586                0/1     ContainerCreating   0          7m16s   <none>        mundial-v3-single-control-plane   <none>           <none>
+prometheus-54f95d4f7-7tkzf              0/1     ContainerCreating   0          7m16s   <none>        mundial-v3-single-control-plane   <none>           <none>
+tempo-5cbffc9f-n78s5                    0/1     ContainerCreating   0          7m16s   <none>        mundial-v3-single-control-plane   <none>           <none>
+tournament-db-0                         1/1     Running             0          8m47s   10.244.0.7    mundial-v3-single-control-plane   <none>           <none>
+tournaments-api-cccbcd569-5hf9k         0/1     Running             0          7m15s   10.244.0.9    mundial-v3-single-control-plane   <none>           <none>
+tournaments-consumer-578df9d9f8-c2sw7   1/1     Running             0          7m15s   10.244.0.11   mundial-v3-single-control-plane   <none>           <none>
+tournaments-migrate-n5bwf               0/1     Completed           0          8m6s    10.244.0.8    mundial-v3-single-control-plane   <none>           <none>
+traefik-65fb895b67-r25lp                1/1     Running             0          7m15s   10.244.0.10   mundial-v3-single-control-plane   <none>           <none>

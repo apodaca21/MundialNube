@@ -488,3 +488,9 @@ tournaments.db-wal
 
 # Configuración local de Docker Compose
 .env
+
+# Configuracion y evidencias locales v3
+.env.v3
+loadtests/results/
+
+.venv-load/

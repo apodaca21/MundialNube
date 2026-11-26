@@ -51,7 +51,7 @@ public class MatchRepository : IMatchRepository
 
     private static Match Copy(Match match)
     {
-        var copy = new Match(match.Id, match.TournamentId, match.GroupId, match.HomeTeamId, match.VisitorTeamId);
+        var copy = new Match(match.Id, match.TournamentId, match.GroupId, match.HomeTeamId, match.VisitorTeamId, match.Round);
         if (match.IsCompleted)
             copy.UpdateScore(new Score(match.Score.HomeTeamScore, match.Score.VisitorTeamScore));
 

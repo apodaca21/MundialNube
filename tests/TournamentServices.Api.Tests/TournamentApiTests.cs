@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using TournamentServices.Repositories;
+using TournamentServices.Api.Monitoring;
 
 namespace TournamentServices.Api.Tests;
 
@@ -39,11 +40,12 @@ public class TournamentWebApplicationFactory : WebApplicationFactory<Program>
         builder.ConfigureTestServices(services =>
         {
             services.RemoveAll<ITeamRepository>();
-            services.AddScoped<ITeamRepository, TournamentTeamCatalogRepository>();
+            services.AddScoped<ITeamRepository, EfTeamRepository>();
             services.RemoveAll<TournamentDbContext>();
             services.RemoveAll<DbContextOptions<TournamentDbContext>>();
             services.RemoveAll<IDbContextOptionsConfiguration<TournamentDbContext>>();
-            services.AddDbContext<TournamentDbContext>(options => options.UseSqlite(_connection));
+            services.AddDbContext<TournamentDbContext>((provider, options) => options.UseSqlite(_connection)
+                .AddInterceptors(provider.GetRequiredService<DatabaseTelemetryInterceptor>()));
         });
     }
 

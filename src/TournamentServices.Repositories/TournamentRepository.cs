@@ -43,9 +43,14 @@ public class TournamentRepository(TournamentDbContext db) : ITournamentRepositor
 
     public async Task<bool> DeleteAsync(string id, CancellationToken cancellationToken = default)
     {
-        // SQLite elimina también grupos, partidos y participantes. El historial de campeones se conserva.
+        // Null-group knockout matches are not removed by the group cascade.
+        await using var transaction = db.Database.CurrentTransaction is null
+            ? await db.Database.BeginTransactionAsync(cancellationToken) : null;
+        await db.Matches.Where(match => match.TournamentId == id).ExecuteDeleteAsync(cancellationToken);
+        // The database removes groups and participants. Historical champions remain.
         var deleted = await db.Tournaments.Where(tournament => tournament.Id == id)
             .ExecuteDeleteAsync(cancellationToken);
+        if (transaction is not null) await transaction.CommitAsync(cancellationToken);
         return deleted > 0;
     }
 }

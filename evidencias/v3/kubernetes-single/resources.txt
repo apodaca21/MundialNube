@@ -1,0 +1,6 @@
+NAME                                    CPU(cores)   MEMORY(bytes)
+activemq-8656c7f8f4-j2rxm               302m         39Mi
+tournament-db-0                         81m          42Mi
+tournaments-api-cccbcd569-5hf9k         95m          14Mi
+tournaments-consumer-578df9d9f8-c2sw7   98m          22Mi
+traefik-65fb895b67-r25lp                144m         48Mi

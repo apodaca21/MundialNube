@@ -1,0 +1,25 @@
+{
+  "scenario": "compose-smoke",
+  "host": "http://localhost:8183",
+  "started_at_utc": "2026-11-26T03:33:21.189934+00:00",
+  "ended_at_utc": "2026-11-26T03:33:35.414389+00:00",
+  "duration_seconds": 14.224454879760742,
+  "configured_users": 4,
+  "peak_users": 4,
+  "requests": 417,
+  "failures": 0,
+  "requests_per_second": 29.533014977906443,
+  "latency_ms": {
+    "average": 33.15211812032016,
+    "min": 0.6136669544503093,
+    "p50": 5,
+    "p95": 43,
+    "p99": 1200,
+    "max": 1628.0229999683797
+  },
+  "pods_seen": 1,
+  "requests_by_pod": {
+    "compose-v3-api": 417
+  },
+  "responses_without_pod_header": 0
+}

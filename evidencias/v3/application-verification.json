@@ -1,0 +1,64 @@
+{
+  "executedAtUtc": "2026-11-26T03:42:05.466658+00:00",
+  "runtime": ".NET 10",
+  "postgresql": 16,
+  "tests": {
+    "domain": 23,
+    "delegates": 48,
+    "repositories": 33,
+    "api": 137,
+    "totalPassed": 241,
+    "failed": 0,
+    "skipped": 0
+  },
+  "postgresIntegration": "Real PostgreSQL16; isolated temporary schema removed by test",
+  "httpSimulation": {
+    "tournamentId": "7357b516-4340-429a-839e-36298242d7b0",
+    "champion": {
+      "id": 1,
+      "tournamentId": "7357b516-4340-429a-839e-36298242d7b0",
+      "tournamentName": "V3 integration verification",
+      "teamId": "50743a2a-b079-481b-9c01-3a0a7ae3f279",
+      "teamName": "Suecia - 7357b516-4340-429a-839e-36298242d7b0",
+      "completedAtUtc": "2026-11-26T03:31:13.715842Z"
+    }
+  },
+  "messaging": {
+    "championsPersisted": 1,
+    "outboxPublished": 1,
+    "eventsConsumed": 1,
+    "verification": "Observed SQL counts after full simulation in isolated v3 Compose"
+  },
+  "observability": {
+    "prometheusHttpRateObserved": 1.2662003954269703,
+    "prometheusPostgresCommandRateObserved": 2.805373115191678,
+    "rateWindow": "5m",
+    "tempo": "Real database.select spans returned by /api/search"
+  },
+  "memoryPreliminary": {
+    "environment": "separate Docker container, not Kubernetes",
+    "limits": {
+      "cpu": "100m",
+      "memory": "56Mi"
+    },
+    "health": {
+      "httpStatus": 200,
+      "durationSeconds": 18.548406
+    },
+    "ready": {
+      "result": "timeout",
+      "timeoutSeconds": 30
+    },
+    "lastObservedMemory": "54.64MiB / 56MiB",
+    "result": "Readiness criterion not met; no successful capacity claim"
+  },
+  "demoFinal": {
+    "tournaments": 20,
+    "teams": 640,
+    "completedMatches": 1260,
+    "champions": 20,
+    "outboxPublished": 20,
+    "eventsConsumed": 20,
+    "verification": "HTTP report and PostgreSQL counts after scripts/seed-demo.py on final image"
+  }
+}

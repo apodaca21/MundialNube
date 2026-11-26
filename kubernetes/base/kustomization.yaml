@@ -1,0 +1,30 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: mundialnube-v3
+resources:
+- namespace.yaml
+- postgres.yaml
+- activemq.yaml
+- api.yaml
+- consumer.yaml
+- hpa.yaml
+- ingress.yaml
+- observability.yaml
+configMapGenerator:
+- name: prometheus-config
+  files:
+  - prometheus.yml=../../monitoring/v3/prometheus-kubernetes.yaml
+- name: tempo-config
+  files:
+  - tempo.yaml=../../monitoring/v3/tempo.yaml
+- name: grafana-datasources
+  files:
+  - datasources.yaml=../../monitoring/v3/grafana/provisioning/datasources/observability.yaml
+- name: grafana-providers
+  files:
+  - dashboards.yaml=../../monitoring/v3/grafana/provisioning/dashboards/dashboards.yaml
+- name: grafana-dashboards
+  files:
+  - mundial-nube.json=../../monitoring/grafana/dashboards/mundial-nube.json
+  - mundial-v3-performance.json=../../monitoring/grafana/dashboards/mundial-v3-performance.json

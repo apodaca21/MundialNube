@@ -1,0 +1,167 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: traefik
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: mundial-v3-traefik
+rules:
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingressclasses
+  verbs:
+  - get
+  - list
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: mundial-v3-traefik
+subjects:
+- kind: ServiceAccount
+  name: traefik
+  namespace: mundialnube-v3
+roleRef:
+  kind: ClusterRole
+  name: mundial-v3-traefik
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: networking.k8s.io/v1
+kind: IngressClass
+metadata:
+  name: mundial-traefik
+spec:
+  controller: traefik.io/ingress-controller
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: traefik
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: traefik
+  template:
+    metadata:
+      labels:
+        app: traefik
+    spec:
+      serviceAccountName: traefik
+      containers:
+      - name: traefik
+        image: traefik:v3.8.0
+        args:
+        - --entrypoints.web.address=:8000
+        - --providers.kubernetesingress=true
+        - --providers.kubernetesingress.ingressclass=mundial-traefik
+        - --providers.kubernetesingress.namespaces=mundialnube-v3
+        - --providers.kubernetesingress.nativelbbydefault=false
+        - --accesslog=true
+        - --accesslog.format=json
+        - --ping=true
+        - --entrypoints.traefik.address=:8080
+        ports:
+        - name: web
+          containerPort: 8000
+        - name: admin
+          containerPort: 8080
+        readinessProbe:
+          httpGet:
+            path: /ping
+            port: admin
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 500m
+            memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: traefik
+spec:
+  selector:
+    app: traefik
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8000
+    nodePort: 30080
+  type: NodePort
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: tournaments-api
+spec:
+  ingressClassName: mundial-traefik
+  rules:
+  - host: mundial.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: tournaments-api
+            port:
+              number: 8080
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: traefik-routing
+rules:
+- apiGroups:
+  - ''
+  resources:
+  - services
+  - endpoints
+  - secrets
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - discovery.k8s.io
+  resources:
+  - endpointslices
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses/status
+  verbs:
+  - update
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: traefik-routing
+subjects:
+- kind: ServiceAccount
+  name: traefik
+  namespace: mundialnube-v3
+roleRef:
+  kind: Role
+  name: traefik-routing
+  apiGroup: rbac.authorization.k8s.io

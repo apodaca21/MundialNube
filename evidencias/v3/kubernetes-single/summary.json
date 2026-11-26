@@ -1,0 +1,40 @@
+{
+  "recorded_utc": "2026-11-26T03:46:41.770504+00:00",
+  "context": "kind-mundial-v3-single",
+  "kubernetes_version": "v1.34.0",
+  "nodes": 1,
+  "image": "mundialnube-api:v3",
+  "image_note": "Build anterior a la última revisión de aplicación. No se ejecutó benchmark ni se verificó el build final en Kubernetes.",
+  "api_requests": {
+    "cpu": "100m",
+    "memory": "56Mi"
+  },
+  "api_limits": {
+    "cpu": "100m",
+    "memory": "56Mi"
+  },
+  "observations": {
+    "namespace_and_secrets_created": true,
+    "postgres_ready": true,
+    "migration_job_completed": true,
+    "traefik_ready_at_last_snapshot": true,
+    "api_ready_at_last_snapshot": false,
+    "api_restarts_at_last_snapshot": 0,
+    "api_age_last_snapshot": "7m15s",
+    "api_sample_cpu": "95m",
+    "api_sample_memory": "14Mi",
+    "rollout_timed_out": true,
+    "kubernetes_api_tls_timeouts_observed": true
+  },
+  "not_verified": [
+    "API disponible con 56Mi",
+    "comparación Locust sin/con Ingress",
+    "reparto de tráfico entre tres réplicas",
+    "escalado HPA",
+    "topología multinodo",
+    "despliegue de la imagen final"
+  ],
+  "interpretation": "Ensayo inconcluso por saturación del host compartido de Docker (3.828 GiB). La API no llegó a Ready en la ventana observada. La muestra de memoria no demuestra OOM ni permite atribuir el fallo exclusivamente a 56 MiB.",
+  "cleanup": "Clúster de prueba aislado retirado después de capturar evidencia; datos y aplicaciones existentes conservados.",
+  "docker_memory_reported": "3.828GiB"
+}

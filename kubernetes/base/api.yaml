@@ -1,0 +1,117 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tournaments-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tournaments-api
+  template:
+    metadata:
+      labels:
+        app: tournaments-api
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '8080'
+    spec:
+      containers:
+      - name: api
+        image: mundialnube-api:dev
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 8080
+        env:
+        - name: ASPNETCORE_HTTP_PORTS
+          value: '8080'
+        - name: Database__Provider
+          value: Postgres
+        - name: Database__MigrateOnStartup
+          value: 'false'
+        - name: ConnectionStrings__TournamentsConnection
+          valueFrom:
+            secretKeyRef:
+              name: mundial-secrets
+              key: database-connection
+        - name: Messaging__Enabled
+          value: 'true'
+        - name: Messaging__Host
+          value: activemq
+        - name: Messaging__Port
+          value: '61613'
+        - name: Messaging__Username
+          valueFrom:
+            secretKeyRef:
+              name: mundial-secrets
+              key: broker-user
+        - name: Messaging__Password
+          valueFrom:
+            secretKeyRef:
+              name: mundial-secrets
+              key: broker-password
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: http://tempo:4317
+        - name: OTEL_EXPORTER_OTLP_PROTOCOL
+          value: grpc
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: DOTNET_gcServer
+          value: '0'
+        - name: DOTNET_GCConserveMemory
+          value: '9'
+        - name: DOTNET_GCHeapHardLimitPercent
+          value: '35'
+        resources:
+          requests:
+            cpu: 100m
+            memory: 56Mi
+          limits:
+            cpu: 100m
+            memory: 56Mi
+        startupProbe:
+          httpGet:
+            path: /health
+            port: http
+          failureThreshold: 60
+          periodSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: http
+          periodSeconds: 10
+          timeoutSeconds: 3
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: http
+          periodSeconds: 15
+          timeoutSeconds: 3
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          runAsNonRoot: true
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            app: tournaments-api
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tournaments-api
+spec:
+  selector:
+    app: tournaments-api
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080

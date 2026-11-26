@@ -6,8 +6,10 @@ public class Match
 {
     public const string IdPattern = Team.IdPattern;
 
-    public Match(string id, string tournamentId, string? groupId, string homeTeamId, string visitorTeamId)
+    public Match(string id, string tournamentId, string? groupId, string homeTeamId, string visitorTeamId, int round = 0)
     {
+        if (round < 0) throw new ArgumentOutOfRangeException(nameof(round));
+        Round = round;
         Id = id;
         TournamentId = tournamentId;
         GroupId = groupId;
@@ -16,6 +18,7 @@ public class Match
         Score = new Score();
     }
 
+    public int Round { get; }
     public string Id { get; }
     public string TournamentId { get; }
     public string? GroupId { get; }

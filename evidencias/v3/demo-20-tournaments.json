@@ -1,0 +1,342 @@
+{
+  "addedTournaments": 19,
+  "addedTeams": 608,
+  "addedMatches": 1197,
+  "results": [
+    {
+      "tournamentId": "e4de710c-4eea-4de5-b63a-6732ca44d1c5",
+      "tournamentName": "DEMO V3 20261126-034808-47b007 01",
+      "champion": "Países Bajos - e4de710c-4eea-4de5-b63a-6732ca44d1c5",
+      "championTeamId": "ce57b281-079b-4134-a547-cf7df217f84b",
+      "teams": 32,
+      "matches": 63,
+      "completedAtUtc": "2026-11-26T03:48:09.301999Z"
+    },
+    {
+      "tournamentId": "68778352-ddcd-4dfb-aa1a-d6766cfbf33b",
+      "tournamentName": "DEMO V3 20261126-034808-47b007 02",
+      "champion": "Bélgica - 68778352-ddcd-4dfb-aa1a-d6766cfbf33b",
+      "championTeamId": "1dbba728-cb8d-4ee1-94a7-150e674c065d",
+      "teams": 32,
+      "matches": 63,
+      "completedAtUtc": "2026-11-26T03:48:09.648515Z"
+    },
+    {
+      "tournamentId": "292aefda-7742-4765-9e18-a2575fc77688",
+      "tournamentName": "DEMO V3 20261126-034808-47b007 03",
+      "champion": "Ecuador - 292aefda-7742-4765-9e18-a2575fc77688",
+      "championTeamId": "e829d33b-96ba-4105-ac9d-831f5b9b35e9",
+      "teams": 32,
+      "matches": 63,
+      "completedAtUtc": "2026-11-26T03:48:10.292757Z"
+    },
+    {
+      "tournamentId": "5670b312-3fb4-49a1-81c7-68326257fed8",
+      "tournamentName": "DEMO V3 20261126-034808-47b007 04",
+      "champion": "Argentina - 5670b312-3fb4-49a1-81c7-68326257fed8",
+      "championTeamId": "9889e9b6-1fc2-4a33-a781-e9fc3abb55c7",
+      "teams": 32,
+      "matches": 63,
+      "completedAtUtc": "2026-11-26T03:48:10.570935Z"
+    },
+    {
+      "tournamentId": "5868ef89-8d4a-4c99-bfed-2556517093ca",
+      "tournamentName": "DEMO V3 20261126-034808-47b007 05",
+      "champion": "Dinamarca - 5868ef89-8d4a-4c99-bfed-2556517093ca",
+      "championTeamId": "a8ba7af1-12da-4a91-8042-ef1956354096",
+      "teams": 32,
+      "matches": 63,
+      "completedAtUtc": "2026-11-26T03:48:10.877804Z"
+    },
+    {
+      "tournamentId": "bbb7af09-49b3-4c7f-9e9a-9137425013a2",
+      "tournamentName": "DEMO V3 20261126-034808-47b007 06",
+      "champion": "Corea del Sur - bbb7af09-49b3-4c7f-9e9a-9137425013a2",
+      "championTeamId": "6ecfbf0f-f777-4d01-bb97-b301baee9257",
+      "teams": 32,
+      "matches": 63,
+      "completedAtUtc": "2026-11-26T03:48:11.358204Z"
+    },
+    {
+      "tournamentId": "14ae0ef7-4bf4-443b-b833-3eac4f193ef3",
+      "tournamentName": "DEMO V3 20261126-034808-47b007 07",
+      "champion": "España - 14ae0ef7-4bf4-443b-b833-3eac4f193ef3",
+      "championTeamId": "a982481e-d435-4f1b-adf9-3db2ac5d40a4",
+      "teams": 32,
+      "matches": 63,
+      "completedAtUtc": "2026-11-26T03:48:11.61282Z"
+    },
+    {
+      "tournamentId": "aeb50245-c412-4a7b-88f7-a5875522d34d",
+      "tournamentName": "DEMO V3 20261126-034808-47b007 08",
+      "champion": "Canadá - aeb50245-c412-4a7b-88f7-a5875522d34d",
+      "championTeamId": "40889441-1749-47dd-a278-72439e6cf4d8",
+      "teams": 32,
+      "matches": 63,
+      "completedAtUtc": "2026-11-26T03:48:11.930155Z"
+    },
+    {
+      "tournamentId": "c4c0d9da-cf6b-493e-9878-84fb6079aad3",
+      "tournamentName": "DEMO V3 20261126-034808-47b007 09",
+      "champion": "Japón - c4c0d9da-cf6b-493e-9878-84fb6079aad3",
+      "championTeamId": "0d9821dc-121d-41dc-9a14-52a94ad72a78",
+      "teams": 32,
+      "matches": 63,
+      "completedAtUtc": "2026-11-26T03:48:12.338807Z"
+    },
+    {
+      "tournamentId": "9ce9d529-1ec6-4caa-b79c-6835271f750f",
+      "tournamentName": "DEMO V3 20261126-034808-47b007 10",
+      "champion": "España - 9ce9d529-1ec6-4caa-b79c-6835271f750f",
+      "championTeamId": "619da3e5-ae1d-4cbb-bae3-0477f191ad98",
+      "teams": 32,
+      "matches": 63,
+      "completedAtUtc": "2026-11-26T03:48:12.592956Z"
+    },
+    {
+      "tournamentId": "4772adf6-eb4f-44d9-9b9c-f52936040890",
+      "tournamentName": "DEMO V3 20261126-034808-47b007 11",
+      "champion": "Argentina - 4772adf6-eb4f-44d9-9b9c-f52936040890",
+      "championTeamId": "1339989a-6b19-43ae-88f2-28d82f124697",
+      "teams": 32,
+      "matches": 63,
+      "completedAtUtc": "2026-11-26T03:48:12.913181Z"
+    },
+    {
+      "tournamentId": "1a5453ba-5f67-4a65-9e82-8bf5103ea696",
+      "tournamentName": "DEMO V3 20261126-034808-47b007 12",
+      "champion": "Suecia - 1a5453ba-5f67-4a65-9e82-8bf5103ea696",
+      "championTeamId": "540918a0-707e-4bb4-9806-96306e9466ca",
+      "teams": 32,
+      "matches": 63,
+      "completedAtUtc": "2026-11-26T03:48:13.212978Z"
+    },
+    {
+      "tournamentId": "db1f596c-590f-4fc1-8af5-84a58e16d1d7",
+      "tournamentName": "DEMO V3 20261126-034808-47b007 13",
+      "champion": "Inglaterra - db1f596c-590f-4fc1-8af5-84a58e16d1d7",
+      "championTeamId": "65444f43-7665-4246-87a5-81342efe60ab",
+      "teams": 32,
+      "matches": 63,
+      "completedAtUtc": "2026-11-26T03:48:13.540454Z"
+    },
+    {
+      "tournamentId": "31e178fe-6b04-474e-bfd7-3bb1695e8166",
+      "tournamentName": "DEMO V3 20261126-034808-47b007 14",
+      "champion": "Ecuador - 31e178fe-6b04-474e-bfd7-3bb1695e8166",
+      "championTeamId": "59fb16c3-1fb9-4f74-b97c-5720ab476555",
+      "teams": 32,
+      "matches": 63,
+      "completedAtUtc": "2026-11-26T03:48:13.841458Z"
+    },
+    {
+      "tournamentId": "ae2d10d8-07b0-43a3-9589-e92fc30bbc21",
+      "tournamentName": "DEMO V3 20261126-034808-47b007 15",
+      "champion": "Paraguay - ae2d10d8-07b0-43a3-9589-e92fc30bbc21",
+      "championTeamId": "75d6c059-abbc-42cf-badc-39093c1c1b42",
+      "teams": 32,
+      "matches": 63,
+      "completedAtUtc": "2026-11-26T03:48:14.357557Z"
+    },
+    {
+      "tournamentId": "8170bfed-aa3d-446a-8860-46a8f7c51e70",
+      "tournamentName": "DEMO V3 20261126-034808-47b007 16",
+      "champion": "Suecia - 8170bfed-aa3d-446a-8860-46a8f7c51e70",
+      "championTeamId": "49124052-cf13-418a-8dff-cbca6f153eaa",
+      "teams": 32,
+      "matches": 63,
+      "completedAtUtc": "2026-11-26T03:48:14.949602Z"
+    },
+    {
+      "tournamentId": "dca8d37b-11b5-44dc-ad47-dd95cbbe94ed",
+      "tournamentName": "DEMO V3 20261126-034808-47b007 17",
+      "champion": "México - dca8d37b-11b5-44dc-ad47-dd95cbbe94ed",
+      "championTeamId": "9cd514a1-dadb-44bd-a87b-f5daea463d12",
+      "teams": 32,
+      "matches": 63,
+      "completedAtUtc": "2026-11-26T03:48:15.312382Z"
+    },
+    {
+      "tournamentId": "a3955a94-a01a-4dab-9c78-d1caa886b756",
+      "tournamentName": "DEMO V3 20261126-034808-47b007 18",
+      "champion": "Croacia - a3955a94-a01a-4dab-9c78-d1caa886b756",
+      "championTeamId": "92cc97fd-737d-4ae7-8a48-ee4b92399046",
+      "teams": 32,
+      "matches": 63,
+      "completedAtUtc": "2026-11-26T03:48:15.796248Z"
+    },
+    {
+      "tournamentId": "6cc163d8-90f5-4043-9e86-e75db67ca302",
+      "tournamentName": "DEMO V3 20261126-034808-47b007 19",
+      "champion": "Bélgica - 6cc163d8-90f5-4043-9e86-e75db67ca302",
+      "championTeamId": "b734e806-e157-4f7b-b175-f96f2e37ef37",
+      "teams": 32,
+      "matches": 63,
+      "completedAtUtc": "2026-11-26T03:48:16.077731Z"
+    }
+  ],
+  "totalTournaments": 20,
+  "recentChampions": [
+    {
+      "id": 20,
+      "tournamentId": "6cc163d8-90f5-4043-9e86-e75db67ca302",
+      "tournamentName": "DEMO V3 20261126-034808-47b007 19",
+      "teamId": "b734e806-e157-4f7b-b175-f96f2e37ef37",
+      "teamName": "Bélgica - 6cc163d8-90f5-4043-9e86-e75db67ca302",
+      "completedAtUtc": "2026-11-26T03:48:16.077731Z"
+    },
+    {
+      "id": 19,
+      "tournamentId": "a3955a94-a01a-4dab-9c78-d1caa886b756",
+      "tournamentName": "DEMO V3 20261126-034808-47b007 18",
+      "teamId": "92cc97fd-737d-4ae7-8a48-ee4b92399046",
+      "teamName": "Croacia - a3955a94-a01a-4dab-9c78-d1caa886b756",
+      "completedAtUtc": "2026-11-26T03:48:15.796248Z"
+    },
+    {
+      "id": 18,
+      "tournamentId": "dca8d37b-11b5-44dc-ad47-dd95cbbe94ed",
+      "tournamentName": "DEMO V3 20261126-034808-47b007 17",
+      "teamId": "9cd514a1-dadb-44bd-a87b-f5daea463d12",
+      "teamName": "México - dca8d37b-11b5-44dc-ad47-dd95cbbe94ed",
+      "completedAtUtc": "2026-11-26T03:48:15.312382Z"
+    },
+    {
+      "id": 17,
+      "tournamentId": "8170bfed-aa3d-446a-8860-46a8f7c51e70",
+      "tournamentName": "DEMO V3 20261126-034808-47b007 16",
+      "teamId": "49124052-cf13-418a-8dff-cbca6f153eaa",
+      "teamName": "Suecia - 8170bfed-aa3d-446a-8860-46a8f7c51e70",
+      "completedAtUtc": "2026-11-26T03:48:14.949602Z"
+    },
+    {
+      "id": 16,
+      "tournamentId": "ae2d10d8-07b0-43a3-9589-e92fc30bbc21",
+      "tournamentName": "DEMO V3 20261126-034808-47b007 15",
+      "teamId": "75d6c059-abbc-42cf-badc-39093c1c1b42",
+      "teamName": "Paraguay - ae2d10d8-07b0-43a3-9589-e92fc30bbc21",
+      "completedAtUtc": "2026-11-26T03:48:14.357557Z"
+    },
+    {
+      "id": 15,
+      "tournamentId": "31e178fe-6b04-474e-bfd7-3bb1695e8166",
+      "tournamentName": "DEMO V3 20261126-034808-47b007 14",
+      "teamId": "59fb16c3-1fb9-4f74-b97c-5720ab476555",
+      "teamName": "Ecuador - 31e178fe-6b04-474e-bfd7-3bb1695e8166",
+      "completedAtUtc": "2026-11-26T03:48:13.841458Z"
+    },
+    {
+      "id": 14,
+      "tournamentId": "db1f596c-590f-4fc1-8af5-84a58e16d1d7",
+      "tournamentName": "DEMO V3 20261126-034808-47b007 13",
+      "teamId": "65444f43-7665-4246-87a5-81342efe60ab",
+      "teamName": "Inglaterra - db1f596c-590f-4fc1-8af5-84a58e16d1d7",
+      "completedAtUtc": "2026-11-26T03:48:13.540454Z"
+    },
+    {
+      "id": 13,
+      "tournamentId": "1a5453ba-5f67-4a65-9e82-8bf5103ea696",
+      "tournamentName": "DEMO V3 20261126-034808-47b007 12",
+      "teamId": "540918a0-707e-4bb4-9806-96306e9466ca",
+      "teamName": "Suecia - 1a5453ba-5f67-4a65-9e82-8bf5103ea696",
+      "completedAtUtc": "2026-11-26T03:48:13.212978Z"
+    },
+    {
+      "id": 12,
+      "tournamentId": "4772adf6-eb4f-44d9-9b9c-f52936040890",
+      "tournamentName": "DEMO V3 20261126-034808-47b007 11",
+      "teamId": "1339989a-6b19-43ae-88f2-28d82f124697",
+      "teamName": "Argentina - 4772adf6-eb4f-44d9-9b9c-f52936040890",
+      "completedAtUtc": "2026-11-26T03:48:12.913181Z"
+    },
+    {
+      "id": 11,
+      "tournamentId": "9ce9d529-1ec6-4caa-b79c-6835271f750f",
+      "tournamentName": "DEMO V3 20261126-034808-47b007 10",
+      "teamId": "619da3e5-ae1d-4cbb-bae3-0477f191ad98",
+      "teamName": "España - 9ce9d529-1ec6-4caa-b79c-6835271f750f",
+      "completedAtUtc": "2026-11-26T03:48:12.592956Z"
+    },
+    {
+      "id": 10,
+      "tournamentId": "c4c0d9da-cf6b-493e-9878-84fb6079aad3",
+      "tournamentName": "DEMO V3 20261126-034808-47b007 09",
+      "teamId": "0d9821dc-121d-41dc-9a14-52a94ad72a78",
+      "teamName": "Japón - c4c0d9da-cf6b-493e-9878-84fb6079aad3",
+      "completedAtUtc": "2026-11-26T03:48:12.338807Z"
+    },
+    {
+      "id": 9,
+      "tournamentId": "aeb50245-c412-4a7b-88f7-a5875522d34d",
+      "tournamentName": "DEMO V3 20261126-034808-47b007 08",
+      "teamId": "40889441-1749-47dd-a278-72439e6cf4d8",
+      "teamName": "Canadá - aeb50245-c412-4a7b-88f7-a5875522d34d",
+      "completedAtUtc": "2026-11-26T03:48:11.930155Z"
+    },
+    {
+      "id": 8,
+      "tournamentId": "14ae0ef7-4bf4-443b-b833-3eac4f193ef3",
+      "tournamentName": "DEMO V3 20261126-034808-47b007 07",
+      "teamId": "a982481e-d435-4f1b-adf9-3db2ac5d40a4",
+      "teamName": "España - 14ae0ef7-4bf4-443b-b833-3eac4f193ef3",
+      "completedAtUtc": "2026-11-26T03:48:11.61282Z"
+    },
+    {
+      "id": 7,
+      "tournamentId": "bbb7af09-49b3-4c7f-9e9a-9137425013a2",
+      "tournamentName": "DEMO V3 20261126-034808-47b007 06",
+      "teamId": "6ecfbf0f-f777-4d01-bb97-b301baee9257",
+      "teamName": "Corea del Sur - bbb7af09-49b3-4c7f-9e9a-9137425013a2",
+      "completedAtUtc": "2026-11-26T03:48:11.358204Z"
+    },
+    {
+      "id": 6,
+      "tournamentId": "5868ef89-8d4a-4c99-bfed-2556517093ca",
+      "tournamentName": "DEMO V3 20261126-034808-47b007 05",
+      "teamId": "a8ba7af1-12da-4a91-8042-ef1956354096",
+      "teamName": "Dinamarca - 5868ef89-8d4a-4c99-bfed-2556517093ca",
+      "completedAtUtc": "2026-11-26T03:48:10.877804Z"
+    },
+    {
+      "id": 5,
+      "tournamentId": "5670b312-3fb4-49a1-81c7-68326257fed8",
+      "tournamentName": "DEMO V3 20261126-034808-47b007 04",
+      "teamId": "9889e9b6-1fc2-4a33-a781-e9fc3abb55c7",
+      "teamName": "Argentina - 5670b312-3fb4-49a1-81c7-68326257fed8",
+      "completedAtUtc": "2026-11-26T03:48:10.570935Z"
+    },
+    {
+      "id": 4,
+      "tournamentId": "292aefda-7742-4765-9e18-a2575fc77688",
+      "tournamentName": "DEMO V3 20261126-034808-47b007 03",
+      "teamId": "e829d33b-96ba-4105-ac9d-831f5b9b35e9",
+      "teamName": "Ecuador - 292aefda-7742-4765-9e18-a2575fc77688",
+      "completedAtUtc": "2026-11-26T03:48:10.292757Z"
+    },
+    {
+      "id": 3,
+      "tournamentId": "68778352-ddcd-4dfb-aa1a-d6766cfbf33b",
+      "tournamentName": "DEMO V3 20261126-034808-47b007 02",
+      "teamId": "1dbba728-cb8d-4ee1-94a7-150e674c065d",
+      "teamName": "Bélgica - 68778352-ddcd-4dfb-aa1a-d6766cfbf33b",
+      "completedAtUtc": "2026-11-26T03:48:09.648515Z"
+    },
+    {
+      "id": 2,
+      "tournamentId": "e4de710c-4eea-4de5-b63a-6732ca44d1c5",
+      "tournamentName": "DEMO V3 20261126-034808-47b007 01",
+      "teamId": "ce57b281-079b-4134-a547-cf7df217f84b",
+      "teamName": "Países Bajos - e4de710c-4eea-4de5-b63a-6732ca44d1c5",
+      "completedAtUtc": "2026-11-26T03:48:09.301999Z"
+    },
+    {
+      "id": 1,
+      "tournamentId": "7357b516-4340-429a-839e-36298242d7b0",
+      "tournamentName": "V3 integration verification",
+      "teamId": "50743a2a-b079-481b-9c01-3a0a7ae3f279",
+      "teamName": "Suecia - 7357b516-4340-429a-839e-36298242d7b0",
+      "completedAtUtc": "2026-11-26T03:31:13.715842Z"
+    }
+  ],
+  "description": "19 additional complete simulations plus the previously verified tournament; 20 tournaments in isolated v3 PostgreSQL demo."
+}

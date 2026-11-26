@@ -1,0 +1,82 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: activemq-data
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: activemq
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: activemq
+  template:
+    metadata:
+      labels:
+        app: activemq
+    spec:
+      containers:
+      - name: artemis
+        image: apache/artemis:2.57.0-alpine
+        ports:
+        - containerPort: 61613
+        - containerPort: 8161
+        env:
+        - name: ARTEMIS_USER
+          valueFrom:
+            secretKeyRef:
+              name: mundial-secrets
+              key: broker-user
+        - name: ARTEMIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mundial-secrets
+              key: broker-password
+        - name: ANONYMOUS_LOGIN
+          value: 'false'
+        - name: JAVA_ARGS_APPEND
+          value: -Xms128m -Xmx256m
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/artemis-instance
+        readinessProbe:
+          tcpSocket:
+            port: 61613
+          initialDelaySeconds: 15
+          periodSeconds: 5
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: activemq-data
+      securityContext:
+        fsGroup: 1001
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: activemq
+spec:
+  selector:
+    app: activemq
+  ports:
+  - name: service
+    port: 61613
+    targetPort: 61613

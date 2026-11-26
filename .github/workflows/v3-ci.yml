@@ -1,0 +1,97 @@
+name: Test and publish v3
+on:
+  pull_request:
+  push:
+    branches: [main, max-v3]
+  workflow_dispatch:
+    inputs:
+      deploy:
+        description: Deploy the tested image using the configured self-hosted runner
+        type: boolean
+        default: false
+      context:
+        description: Exact Kubernetes context on that runner
+        type: string
+        default: kind-mundial-v3-single
+permissions:
+  contents: read
+concurrency:
+  group: v3-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    # This password belongs only to the disposable CI service, never a deployed database.
+    env:
+      MUNDIAL_TEST_POSTGRES: Host=localhost;Port=5432;Database=tournament_db;Username=tournament_svc;Password=ci_ephemeral_only
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: tournament_db
+          POSTGRES_USER: tournament_svc
+          POSTGRES_PASSWORD: ci_ephemeral_only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U tournament_svc -d tournament_db"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - run: dotnet test TournamentServices.sln --configuration Release --logger trx --results-directory TestResults
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: python -m pip install PyYAML==6.0.3
+      - run: python scripts/validate-infrastructure.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: TestResults
+  image:
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image: ${{ steps.name.outputs.image }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: name
+        env:
+          REPOSITORY: ${{ github.repository }}
+          REVISION: ${{ github.sha }}
+        run: |
+          image="ghcr.io/${REPOSITORY,,}:$REVISION"
+          echo "image=$image" >> "$GITHUB_OUTPUT"
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        if: github.event_name != 'pull_request'
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.name.outputs.image }}
+  deploy:
+    if: github.event_name == 'workflow_dispatch' && inputs.deploy
+    needs: image
+    runs-on: [self-hosted, linux, mundialnube]
+    environment: mundialnube-lab
+    steps:
+      - uses: actions/checkout@v4
+      - name: Migrate once, then deploy
+        env:
+          KUBE_CONTEXT: ${{ inputs.context }}
+          DEPLOY_IMAGE: ${{ needs.image.outputs.image }}
+        run: scripts/deploy-kubernetes.sh "$KUBE_CONTEXT" "$DEPLOY_IMAGE"

@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 using TournamentServices.Domain;
 using TournamentServices.Domain.Exceptions;
 
@@ -6,6 +7,9 @@ namespace TournamentServices.Repositories;
 
 public sealed class TournamentResultsRepository(TournamentDbContext db) : ITournamentResultsRepository
 {
+    public Task<TournamentChampion?> GetChampionAsync(string tournamentId, CancellationToken cancellationToken = default)
+        => db.TournamentChampions.AsNoTracking().SingleOrDefaultAsync(result => result.TournamentId == tournamentId, cancellationToken);
+
     public async Task<IReadOnlyList<TournamentTeam>?> GetTeamsAsync(string tournamentId,
         CancellationToken cancellationToken = default)
     {
@@ -28,10 +32,12 @@ public sealed class TournamentResultsRepository(TournamentDbContext db) : ITourn
                 cancellationToken))
             throw new TeamNotInTournamentException(tournamentId, teamId);
 
+        await using var transaction = db.Database.CurrentTransaction is null
+            ? await db.Database.BeginTransactionAsync(cancellationToken) : null;
         var completedAtUtc = DateTime.UtcNow;
         // One atomic insert selects the current names and membership from the database.
         // The unique tournament index makes concurrent/repeated requests idempotent.
-        await db.Database.ExecuteSqlInterpolatedAsync($"""
+        var inserted = await db.Database.ExecuteSqlInterpolatedAsync($"""
             INSERT INTO "TournamentChampions"
                 ("TournamentId", "TournamentName", "TeamId", "TeamName", "CompletedAtUtc")
             SELECT tournament."Id", tournament."Name", team."Id", team."Name", {completedAtUtc}
@@ -52,6 +58,21 @@ public sealed class TournamentResultsRepository(TournamentDbContext db) : ITourn
         }
         if (champion.TeamId != teamId)
             throw new TournamentAlreadyCompletedException(tournamentId);
+        if (inserted > 0)
+        {
+            db.OutboxEvents.Add(new OutboxEvent
+            {
+                Id = $"champion-{champion.Id}", Type = "champion.completed", OccurredAtUtc = champion.CompletedAtUtc,
+                Payload = JsonSerializer.Serialize(new
+                {
+                    source = "mundialnube", id = champion.Id, tournamentId = champion.TournamentId,
+                    tournamentName = champion.TournamentName, teamId = champion.TeamId,
+                    teamName = champion.TeamName, completedAtUtc = champion.CompletedAtUtc
+                })
+            });
+            await db.SaveChangesAsync(cancellationToken);
+        }
+        if (transaction is not null) await transaction.CommitAsync(cancellationToken);
         return champion;
     }
 
