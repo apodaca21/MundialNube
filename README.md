@@ -89,3 +89,9 @@ En Development está disponible `/swagger`. La cadena de conexión se configura 
 Las pruebas cubren generación independiente de equipos, pertenencia al torneo, validación del campeón, idempotencia, orden y límite del reporte, CSV, persistencia, actualización de bases anteriores e integración de métricas.
 
 Para revisar la entrega del lunes 23 de noviembre de 2026: iniciar los servicios, crear dos torneos y comprobar equipos distintos, registrar los ganadores reales, descargar el reporte y comprobar que Grafana muestra el último ganador después del siguiente muestreo. No se incluyen campeones ficticios en la base de la aplicación.
+
+## Reporte PDF de demostración
+
+[Descargar el reporte de los últimos 20 torneos](reports/reporte_20_torneos_mundialnube.pdf).
+
+Documento de cuatro páginas con los 20 campeones, las estadísticas de 640 equipos y la distribución por nombre de selección. Corresponde a los datos de prueba locales con corte al 20 de noviembre de 2026. Es un reporte estático: no incluye marcadores ni estadísticas de partidos, porque no había partidos registrados al generarlo.
