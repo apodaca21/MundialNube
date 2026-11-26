@@ -65,6 +65,7 @@ internal static class PersistenceSchema
             CREATE UNIQUE INDEX IF NOT EXISTS "IX_ManualTeams_Name" ON "ManualTeams" ("Name");
             CREATE UNIQUE INDEX IF NOT EXISTS "IX_Groups_TournamentId_Name" ON "Groups" ("TournamentId", "Name");
             CREATE UNIQUE INDEX IF NOT EXISTS "IX_TournamentTeams_TournamentId_Name" ON "TournamentTeams" ("TournamentId", "Name");
+            CREATE INDEX IF NOT EXISTS "IX_TournamentTeams_Name_Id" ON "TournamentTeams" ("Name", "Id");
             CREATE INDEX IF NOT EXISTS "IX_GroupTeams_TeamId" ON "GroupTeams" ("TeamId");
             CREATE INDEX IF NOT EXISTS "IX_Matches_GroupId" ON "Matches" ("GroupId");
             CREATE UNIQUE INDEX IF NOT EXISTS "IX_TournamentChampions_TournamentId" ON "TournamentChampions" ("TournamentId");

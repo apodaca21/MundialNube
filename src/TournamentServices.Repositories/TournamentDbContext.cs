@@ -52,6 +52,9 @@ public class TournamentDbContext(DbContextOptions<TournamentDbContext> options) 
             .OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<TournamentTeam>()
             .HasIndex(team => new { team.TournamentId, team.Name }).IsUnique();
+        // Supports the global team list, which sorts by name across tournaments.
+        modelBuilder.Entity<TournamentTeam>()
+            .HasIndex(team => new { team.Name, team.Id });
 
         // Historical snapshots deliberately have no foreign keys to live entities.
         modelBuilder.Entity<TournamentChampion>()

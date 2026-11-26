@@ -10,6 +10,14 @@ metadata:
   name: mundial-v3-traefik
 rules:
 - apiGroups:
+  - ''
+  resources:
+  - nodes
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
   - networking.k8s.io
   resources:
   - ingressclasses

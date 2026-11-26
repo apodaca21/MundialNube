@@ -1,0 +1,32 @@
+{
+  "recorded_utc": "2026-11-26T05:05:00Z",
+  "cluster": "kind-mundial-v3-single",
+  "ingress": "Traefik, Host mundial.local, port-forward svc/traefik 127.0.0.1:18080",
+  "api_limits": {"cpu": "100m", "memory": "256Mi"},
+  "dataset": {"tournaments": 200, "teams": 6400, "matches": 3200},
+  "locust": "loadtests/stress_locustfile.py GET /health, GET /tournaments, GET /teams, 35s",
+  "criterion": "Punto de quiebre = primer N cuyo RPS por usuario baja a 60% o menos del RPS de 1 usuario (4.34). Baseline de comparación = 80% de N, redondeado a 2 usuarios.",
+  "breakpoint_users": 3,
+  "baseline_users": 2,
+  "baseline_1replica": [
+    {"users": 1, "rps": 4.34, "avg_ms": 127, "p95_ms": 390, "failures": 0, "api_cpu": "56-88m", "db_cpu": "3-10m"},
+    {"users": 2, "rps": 7.42, "avg_ms": 166, "p95_ms": 610, "failures": 0, "api_cpu": "79-88m", "db_cpu": "10-14m"},
+    {"users": 3, "rps": 6.99, "avg_ms": 326, "p95_ms": 1200, "failures": 0, "note": "RPS/usuario 2.33 = 54% del de 1 usuario"},
+    {"users": 4, "rps": 7.19, "avg_ms": 450, "p95_ms": 1600, "failures": 0, "api_cpu": "98m", "db_cpu": "14m"},
+    {"users": 6, "rps": 4.50, "avg_ms": 1227, "p95_ms": 3100, "failures": 0},
+    {"users": 8, "rps": 5.72, "avg_ms": 1289, "p95_ms": 3100, "failures": 0},
+    {"users": 12, "rps": 7.15, "avg_ms": 1556, "p95_ms": 3800, "failures": 0, "api_cpu": "96-98m", "db_cpu": "12-13m"}
+  ],
+  "database": {
+    "before_index": "Sort + Seq Scan, 3.504 ms, 6400 filas",
+    "after_index": "Index Scan IX_TournamentTeams_Name_Id, 0.982 ms",
+    "union_query_reverted": "GET /teams pasó de 337 ms a 715 ms; se revirtió la consulta y se conservó el índice"
+  },
+  "horizontal_same_2_users": [
+    {"replicas": 1, "rps": 4.05, "avg_ms": 395, "p95_ms": 1100, "split": "142 en un Pod", "image": "consulta UNION, más lenta"},
+    {"replicas": 2, "rps": 6.57, "avg_ms": 202, "p95_ms": 720, "split": "115/115"},
+    {"replicas": 3, "rps": 9.51, "avg_ms": 108, "p95_ms": 460, "split": "111/110/111"},
+    {"replicas": 4, "rps": 11.17, "avg_ms": 78, "p95_ms": 390, "split": "97/98/98/97"}
+  ],
+  "vertical_200m": "No concluyente: 1.31 RPS, 2 fallos, Pod recién creado. El límite activo quedó en 100m/256Mi y 1 réplica."
+}

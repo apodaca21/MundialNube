@@ -15,8 +15,8 @@ for file in (root/'kubernetes').rglob('*.yaml'):
         objects.append(resource)
 api=next(x for x in objects if x['kind']=='Deployment' and x['metadata']['name']=='tournaments-api' and 'replicas' in x['spec'])
 container=api['spec']['template']['spec']['containers'][0]
-assert container['resources']['requests']=={'cpu':'100m','memory':'56Mi'}
-assert container['resources']['limits']=={'cpu':'100m','memory':'56Mi'}
+assert container['resources']['requests']=={'cpu':'100m','memory':'256Mi'}
+assert container['resources']['limits']=={'cpu':'100m','memory':'256Mi'}
 assert any(e['name']=='Database__MigrateOnStartup' and e['value']=='false' for e in container['env'])
 job=next(x for x in objects if x['kind']=='Job')
 assert job['spec']['template']['spec']['containers'][0]['args']==['--migrate']

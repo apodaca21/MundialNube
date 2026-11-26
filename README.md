@@ -31,7 +31,7 @@ El dashboard **MundialNube v3 - API, PostgreSQL y replicas** compara latencias e
 
 El despliegue en kind, los Secrets, el Job de migración, los recursos y los ensayos con/sin Ingress se detallan en [Infraestructura v3](docs/INFRAESTRUCTURA_V3.md). Los resultados realmente ejecutados se distinguen de los procedimientos pendientes en [Verificación de la entrega](evidencias/v3/README.md).
 
-El valor solicitado de CPU es **100m = 0,1 núcleo**. Un cuarto de núcleo sería 250m. La configuración base fija 56Mi de memoria; su viabilidad depende de las pruebas de arranque y carga, no solo del valor del manifiesto. La documentación de evidencias indica el resultado obtenido en este equipo.
+El valor solicitado de CPU es **100m = 0,1 núcleo**. Un cuarto de núcleo sería 250m. La configuración base fija **256Mi** de memoria en `kubernetes/base/api.yaml`. Con 56Mi la API no llegó a Ready.
 
 ## Cargar torneos de demostración
 

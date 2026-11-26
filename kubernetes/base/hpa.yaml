@@ -9,7 +9,7 @@ spec:
     kind: Deployment
     name: tournaments-api
   minReplicas: 1
-  maxReplicas: 3
+  maxReplicas: 4
   metrics:
   - type: Resource
     resource:

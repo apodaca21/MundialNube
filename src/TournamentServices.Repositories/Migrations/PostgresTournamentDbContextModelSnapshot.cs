@@ -171,6 +171,8 @@ namespace TournamentServices.Repositories.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Name", "Id");
+
                     b.HasIndex("TournamentId", "Name")
                         .IsUnique();
 
